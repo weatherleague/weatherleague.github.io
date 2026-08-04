@@ -1,0 +1,225 @@
+---
+import Base from '../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.weatherleague.app';
+
+const title = '웨더리그 — 우리 동네에서 경쟁하는 전 세계 일기예보';
+const description =
+  '기상청 예보와 세계 9개 기상 모델, 웨더리그 앙상블, 오픈웨더까지 12개 채널을 매일 실제 관측과 대조해 채점해요. 우리 동네에서 제일 잘 맞는 날씨 채널을 알려드리는 앱, 웨더리그.';
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'MobileApplication',
+  name: '웨더리그',
+  operatingSystem: 'Android',
+  applicationCategory: 'WeatherApplication',
+  description,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+  url: 'https://weatherleague.github.io/',
+  installUrl: PLAY_URL,
+});
+---
+
+<Base {title} {description} path="/" {jsonLd}>
+  <!-- ① 히어로 -->
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="glow"></div>
+      <div class="glow2"></div>
+    </div>
+    <div class="container hero-grid">
+      <div>
+        <h1 class="headline" data-reveal style="--d:.05s">
+          우리 동네에서 경쟁하는<br />
+          <span class="accent shine">전 세계 일기예보</span>
+        </h1>
+        <p class="lead" data-reveal style="--d:.1s">
+          동네마다 1등 예보는 달라요.<br />
+          매일 채점해서, 우리 동네 1등만 보여드릴게요.
+        </p>
+        <div class="cta-row" data-reveal style="--d:.15s">
+          <a class="btn btn-play" href={PLAY_URL} aria-label="Google Play에서 웨더리그 받기">
+            <img src={`${base}/google-play-icon.svg`} alt="" width="19" height="21" />
+            Google Play
+          </a>
+        </div>
+        <div class="hero-chips" data-reveal style="--d:.2s">
+          <span class="chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.6" />
+              <path d="M3.4 12h17.2M12 3.4c2.9 2.4 2.9 14.8 0 17.2M12 3.4c-2.9 2.4-2.9 14.8 0 17.2" />
+            </svg>
+            국내외 12개 예보 비교
+          </span>
+          <span class="chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8.6" />
+              <path d="m8.2 12.4 2.6 2.6 5-5.6" />
+            </svg>
+            기상청 관측 일단위 채점
+          </span>
+          <span class="chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21s-6.5-5.2-6.5-10a6.5 6.5 0 0 1 13 0c0 4.8-6.5 10-6.5 10Z" />
+              <circle cx="12" cy="11" r="2.4" />
+            </svg>
+            우리 동네 자동 순위
+          </span>
+        </div>
+      </div>
+
+      <div class="mockups" data-reveal style="--d:.15s" aria-label="웨더리그 앱 화면 미리보기">
+        <div class="float float-b">
+          <div class="phone">
+            <img src={`${base}/shot-league.jpg`} alt="우리 동네 신뢰도 리그 — 12개 채널의 동네별 적중률 순위" loading="eager" />
+          </div>
+        </div>
+        <div class="float float-a">
+          <div class="phone">
+            <img src={`${base}/shot-home.jpg`} alt="웨더리그 홈 화면 — 현재 날씨와 이 동네 1위 채널의 브리핑" loading="eager" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 숫자 밴드 -->
+  <section class="block" aria-label="웨더리그 채점 규모">
+    <div class="container">
+      <div class="stats-band" data-reveal>
+        <div class="stat"><b>12개</b><span>매일 채점하는 국내외 채널</span></div>
+        <div class="stat"><b>723곳</b><span>관측소 발표 대조</span></div>
+        <div class="stat"><b>3,084건</b><span>하루에 채점하는 예보</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 특징 4카드 -->
+  <section class="block">
+    <div class="container">
+      <div class="sec-head" data-reveal>
+        <h2>매일 지나치는 예보, 어제 예보는 맞았을까요?</h2>
+        <p>웨더리그는 매일 채점표를 기록해요.</p>
+      </div>
+      <div class="features">
+        <div class="feature" data-reveal>
+          <div class="icon t-gold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 21h8M12 17v4M7 4h10v4.5a5 5 0 0 1-10 0V4Z" />
+              <path d="M7 5H4.5a2.8 2.8 0 0 0 2.9 3.4M17 5h2.5a2.8 2.8 0 0 1-2.9 3.4" />
+            </svg>
+          </div>
+          <span class="k gold">리그</span>
+          <h3>우리 동네 챔피언은 따로 있어요</h3>
+          <p>
+            국내외 12개 예보가 적중률로 매일 순위를 겨뤄요.<br />
+            결과는 지역마다 투명하게 공개해요.
+          </p>
+        </div>
+        <div class="feature" data-reveal style="--d:.08s">
+          <div class="icon t-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="17" rx="3" />
+              <path d="M9 2.5v3M15 2.5v3M8.5 13l2.4 2.4 4.6-5" />
+            </svg>
+          </div>
+          <span class="k green">판정</span>
+          <h3>어제는 어떤 예보가 틀렸을까요?</h3>
+          <p>
+            비·하늘·기온을 실제 관측과 하나하나 대조해요.<br />
+            지난 기록도 날짜별로 다시 볼 수 있어요.
+          </p>
+        </div>
+        <div class="feature" data-reveal style="--d:.16s">
+          <div class="icon t-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" />
+              <path d="M10 19a2.2 2.2 0 0 0 4 0" />
+            </svg>
+          </div>
+          <span class="k blue">브리핑</span>
+          <h3>하루 두 번, 1등 예보로</h3>
+          <p>
+            원하는 시간에 날씨를 알려드려요.<br />
+            우산이 필요한 날, 미리 챙겨드릴게요.
+          </p>
+        </div>
+        <div class="feature" data-reveal style="--d:.24s">
+          <div class="icon t-navy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2" />
+              <rect x="13" y="3.5" width="7.5" height="7.5" rx="2" />
+              <rect x="3.5" y="13" width="7.5" height="7.5" rx="2" />
+              <rect x="13" y="13" width="7.5" height="7.5" rx="2" />
+            </svg>
+          </div>
+          <span class="k navy">위젯</span>
+          <h3>홈 화면에서 바로</h3>
+          <p>
+            크기와 용도가 다른 다양한 위젯을 준비했어요.<br />
+            1등이 바뀌면 위젯도 따라 바뀌어요.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 채점 방식 3단계 -->
+  <section class="block">
+    <div class="container">
+      <div class="sec-head" data-reveal>
+        <h2>채점은 이렇게 해요</h2>
+        <p>사람 손 없이, 매일 같은 기준으로 돌아가요.</p>
+      </div>
+      <div class="steps">
+        <div class="step" data-reveal>
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="5" y="10.5" width="14" height="9.5" rx="2.5" />
+              <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7M12 14.5v2" />
+            </svg>
+          </div>
+          <span class="step-num">STEP 1</span>
+          <h3>저녁에 봉인해요</h3>
+          <p>내일 예보를 그대로 저장해요.<br />나중에 고칠 수 없어요.</p>
+        </div>
+        <div class="step" data-reveal style="--d:.1s">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4.5" y="5" width="15" height="15.5" rx="2.5" />
+              <path d="M8.5 2.8V7M15.5 2.8V7" />
+              <path d="m8.7 13.8 2.3 2.3 4.3-4.9" />
+            </svg>
+          </div>
+          <span class="step-num">STEP 2</span>
+          <h3>아침에 대조해요</h3>
+          <p>기상청 관측 기록과<br />하나하나 맞춰봐요.</p>
+        </div>
+        <div class="step" data-reveal style="--d:.2s">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M8 21h8M12 17v4M7 4h10v4.5a5 5 0 0 1-10 0V4Z" />
+              <path d="M7 5H4.5a2.8 2.8 0 0 0 2.9 3.4M17 5h2.5a2.8 2.8 0 0 1-2.9 3.4" />
+            </svg>
+          </div>
+          <span class="step-num">STEP 3</span>
+          <h3>순위를 다시 매겨요</h3>
+          <p>최근 30일 성적으로<br />우리 동네 1등을 가려요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ CTA -->
+  <div class="container cta-wrap">
+    <section class="cta-band" data-reveal>
+      <h2>오늘 날씨, 1위 예보로 확인하세요</h2>
+      <p>우리 동네 1위는 어디일까요. 앱에서 확인해 보세요.</p>
+      <a class="btn btn-play btn-play-light" href={PLAY_URL} aria-label="Google Play에서 웨더리그 받기">
+        <img src={`${base}/google-play-icon.svg`} alt="" width="19" height="21" />
+        Google Play
+      </a>
+    </section>
+  </div>
+</Base>
