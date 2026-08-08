@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+import { CATEGORY } from '../../lib/category';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const d = post.data.date;
+const fmt = `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, '0')}. ${String(d.getDate()).padStart(2, '0')}`;
+---
+
+<Base title={`${post.data.title} — 웨더리그`} description={post.data.description} path={`/blog/${post.id}/`}>
+  <article class="post">
+    <header class="post-hero">
+      <div class="container narrow">
+        <span class={`cat cat-${post.data.category}`}>{CATEGORY[post.data.category]}</span>
+        <h1>{post.data.title}</h1>
+        <p class="post-lede">{post.data.description}</p>
+        <time datetime={d.toISOString()}>{fmt}</time>
+      </div>
+    </header>
+
+    <div class="container narrow post-body">
+      <Content />
+    </div>
+
+    <div class="container narrow">
+      <div class="post-cta">
+        <div>
+          <strong>우리 동네 순위가 궁금하다면</strong>
+          <p>전국 순위는 여기서 보고, <b>우리 동네 1위</b>는 앱에서 확인하세요. 매일 아침 채점 결과를 알려드려요.</p>
+        </div>
+        <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.weatherleague.app">앱 받기</a>
+      </div>
+      <a class="post-back" href={`${base}/blog/`}>← 블로그 목록으로</a>
+    </div>
+  </article>
+</Base>
