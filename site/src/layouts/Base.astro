@@ -15,7 +15,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // 방침·약관은 별도 저장소(weatherleague-policy)에 남는다 — Play Console 등록 URL 보존
 const POLICY = '/weatherleague-policy';
 const canonical = new URL(base + path, Astro.site).href;
-const ogImage = new URL(`${base}/og.png`, Astro.site).href;
+// 링크 미리보기 이미지. ⚠ **교체할 때는 파일명을 바꾼다** — 카톡·페이스북 등이
+// URL 단위로 미리보기를 며칠 캐시하므로, 같은 이름으로 덮으면 옛 이미지가 계속 뜬다
+// (2026-08-08 교체: og.png → og-2608.png, 구 파일은 이력용으로 남겨 둠).
+const ogImage = new URL(`${base}/og-2608.png`, Astro.site).href;
 const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.weatherleague.app';
 const MAIL = 'contact.weatherleague@gmail.com';
 ---
