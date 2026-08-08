@@ -1,0 +1,105 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { CATEGORY } from '../lib/category';
+import { fmtDate } from '../lib/posts';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  /** 페이지네이션 (없으면 미표시) */
+  page?: { current: number; last: number };
+}
+
+const { posts, page } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pageHref = (n: number) => (n === 1 ? `${base}/blog/` : `${base}/blog/page/${n}/`);
+const cats = Object.keys(CATEGORY) as (keyof typeof CATEGORY)[];
+---
+
+<!-- 카테고리 칩 — 클릭 시 목록을 걸러내고 주소에도 남긴다(?cat=report, 공유 가능) -->
+<div class="chips" role="tablist" aria-label="카테고리">
+  <button class="chip is-on" data-cat="all" role="tab" aria-selected="true">전체</button>
+  {cats.map((c) => (
+    <button class={`chip chip-${c}`} data-cat={c} role="tab" aria-selected="false">{CATEGORY[c]}</button>
+  ))}
+</div>
+
+<div class="post-list" id="postList">
+  {posts.map((post, i) => (
+    <a
+      class="post-card"
+      href={`${base}/blog/${post.id}/`}
+      data-cat={post.data.category}
+      data-reveal
+      style={`--d:${i * 0.05}s`}
+    >
+      {post.data.thumbnail && (
+        <div class="post-thumb">
+          <img src={`${base}${post.data.thumbnail}`} alt="" loading="lazy" />
+        </div>
+      )}
+      <div class="post-card-body">
+        <div class="post-card-head">
+          <span class={`cat cat-${post.data.category}`}>{CATEGORY[post.data.category]}</span>
+          <time datetime={post.data.date.toISOString()}>{fmtDate(post.data.date)}</time>
+        </div>
+        <h2>{post.data.title}</h2>
+        <p>{post.data.description}</p>
+        {post.data.stat && !post.data.thumbnail && (
+          <div class="post-stat">
+            <strong>{post.data.stat}</strong>
+            <span>{post.data.statLabel}</span>
+          </div>
+        )}
+        <span class="post-more">읽어보기 →</span>
+      </div>
+    </a>
+  ))}
+</div>
+
+<p class="chip-empty" id="chipEmpty" hidden>이 카테고리에는 아직 글이 없어요.</p>
+
+{
+  page && page.last > 1 && (
+    <nav class="pager" aria-label="페이지">
+      {page.current > 1 && <a class="pager-arrow" href={pageHref(page.current - 1)}>← 이전</a>}
+      {Array.from({ length: page.last }, (_, i) => i + 1).map((n) => (
+        <a class={`pager-num${n === page.current ? ' is-on' : ''}`} href={pageHref(n)} aria-current={n === page.current ? 'page' : undefined}>
+          {n}
+        </a>
+      ))}
+      {page.current < page.last && <a class="pager-arrow" href={pageHref(page.current + 1)}>다음 →</a>}
+    </nav>
+  )
+}
+
+<script>
+  // 칩 필터 — 정적 사이트라 브라우저에서 거른다. 주소에 ?cat=을 남겨 공유·새로고침에도 유지.
+  const chips = document.querySelectorAll<HTMLButtonElement>('.chip');
+  const cards = document.querySelectorAll<HTMLElement>('#postList .post-card');
+  const empty = document.getElementById('chipEmpty');
+
+  function apply(cat: string, push: boolean) {
+    let shown = 0;
+    cards.forEach((el) => {
+      const ok = cat === 'all' || el.dataset.cat === cat;
+      el.hidden = !ok;
+      if (ok) shown++;
+    });
+    chips.forEach((c) => {
+      const on = c.dataset.cat === cat;
+      c.classList.toggle('is-on', on);
+      c.setAttribute('aria-selected', String(on));
+    });
+    if (empty) empty.hidden = shown !== 0;
+    if (push) {
+      const url = new URL(location.href);
+      if (cat === 'all') url.searchParams.delete('cat');
+      else url.searchParams.set('cat', cat);
+      history.replaceState(null, '', url);
+    }
+  }
+
+  chips.forEach((c) => c.addEventListener('click', () => apply(c.dataset.cat || 'all', true)));
+  const initial = new URL(location.href).searchParams.get('cat');
+  if (initial) apply(initial, false);
+</script>

@@ -419,20 +419,43 @@ section.block { padding: 64px 0 0; }
 .cat-release { background: #E7F4EC; color: #14683A; }
 .cat-notice { background: #FBF1DF; color: #96650F; }
 
+/* ─── 블로그: 카테고리 칩 (클라이언트 필터) ─── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 34px 0 4px;
+}
+.chip {
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--sub);
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: -.03em;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.chip:hover { background: var(--bg-soft); color: var(--ink); }
+.chip.is-on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.chip-empty { margin: 40px 0 90px; color: var(--muted); text-align: center; }
+
 /* ─── 블로그: 목록 ─── */
 .post-list {
   display: grid;
   gap: 18px;
   grid-template-columns: 1fr;
-  margin: 36px 0 100px;
+  margin: 22px 0 44px;
 }
 @media (min-width: 760px) { .post-list { grid-template-columns: 1fr 1fr; } }
 
 .post-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 26px 26px 22px;
+  overflow: hidden;
   background: var(--bg);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -444,6 +467,16 @@ section.block { padding: 64px 0 0; }
   transform: translateY(-4px);
   border-color: transparent;
   box-shadow: 0 18px 40px rgba(22, 48, 79, .10);
+}
+.post-card[hidden] { display: none; }
+.post-thumb { aspect-ratio: 16 / 9; background: var(--bg-soft); overflow: hidden; }
+.post-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.post-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  padding: 24px 26px 22px;
 }
 .post-card-head { display: flex; align-items: center; gap: 10px; }
 .post-card-head time { margin-left: auto; color: var(--muted); font-size: .82rem; }
@@ -468,6 +501,33 @@ section.block { padding: 64px 0 0; }
 .post-stat span { font-size: .84rem; color: var(--sub); }
 .post-more { margin-top: auto; padding-top: 6px; font-size: .88rem; font-weight: 700; color: var(--blue); }
 
+/* ─── 블로그: 페이지네이션 ─── */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 100px;
+}
+.pager a {
+  min-width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: var(--sub);
+  font-size: .9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .2s, color .2s;
+}
+.pager a:hover { background: var(--bg-soft); color: var(--ink); }
+.pager .pager-num.is-on { background: var(--brand); color: #fff; }
+.pager .pager-arrow { color: var(--muted); }
+
 /* ─── 블로그: 글 ─── */
 .container.narrow { max-width: 720px; }
 
@@ -476,23 +536,22 @@ section.block { padding: 64px 0 0; }
   font-size: clamp(1.75rem, 4.2vw, 2.5rem);
   font-weight: 800;
   line-height: 1.32;
-  letter-spacing: -.035em;
+  letter-spacing: -.03em;
   margin: 16px 0 12px;
   text-wrap: balance;
 }
 .post-lede { margin: 0 0 16px; color: var(--sub); font-size: 1.04rem; line-height: 1.75; text-wrap: pretty; }
 .post-hero time { color: var(--muted); font-size: .86rem; }
 
-.post-body { padding-bottom: 8px; font-size: 1.045rem; line-height: 1.85; }
+/* 본문 타이포 — 자간은 전 요소 -3%로 통일 (운영자 확정 2026-08-08, Pretendard) */
+.post-body { padding-bottom: 8px; font-size: 1.045rem; line-height: 1.85; letter-spacing: -.03em; }
 .post-body > p { margin: 0 0 1.35em; color: #1F3A57; text-wrap: pretty; }
-.post-body h2 {
-  margin: 2.2em 0 .7em;
-  font-size: 1.42rem;
-  font-weight: 800;
-  letter-spacing: -.03em;
-  text-wrap: balance;
-}
-.post-body h3 { margin: 1.9em 0 .6em; font-size: 1.14rem; font-weight: 700; }
+.post-body h1, .post-body h2, .post-body h3, .post-body h4 { letter-spacing: -.03em; text-wrap: balance; }
+/* 글 제목은 히어로의 h1이 맡으므로 본문 h1은 큰 소제목으로 쓴다 */
+.post-body h1 { margin: 2.4em 0 .7em; font-size: 1.68rem; font-weight: 800; }
+.post-body h2 { margin: 2.2em 0 .7em; font-size: 1.42rem; font-weight: 800; }
+.post-body h3 { margin: 1.9em 0 .6em; font-size: 1.16rem; font-weight: 700; }
+.post-body h4 { margin: 1.7em 0 .5em; font-size: 1.02rem; font-weight: 700; color: var(--sub); }
 .post-body strong { font-weight: 700; color: var(--ink); }
 .post-body a { color: var(--blue); text-underline-offset: 3px; }
 .post-body hr { margin: 2.6em 0 1.6em; border: 0; border-top: 1px solid var(--line); }
@@ -533,19 +592,22 @@ section.block { padding: 64px 0 0; }
 .post-cta {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
   flex-wrap: wrap;
-  margin: 40px 0 18px;
-  padding: 26px 28px;
+  margin: 44px 0 0;
+  padding: 28px 30px;
   background: linear-gradient(135deg, #142A5D, #123976);
   border-radius: var(--radius);
   color: #fff;
 }
-.post-cta strong { display: block; font-size: 1.08rem; font-weight: 800; margin-bottom: 6px; }
-.post-cta p { margin: 0; font-size: .92rem; line-height: 1.7; color: #C9DCF2; }
+.post-cta-text { flex: 1 1 260px; min-width: 0; }
+.post-cta strong { display: block; font-size: 1.08rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -.03em; }
+.post-cta p { margin: 0; font-size: .92rem; line-height: 1.7; color: #C9DCF2; letter-spacing: -.03em; }
 .post-cta p b { color: #fff; font-weight: 700; }
-/* 남색 카드 위이므로 흰 버튼으로 뒤집는다 (기본 .btn-primary는 남색이라 묻힌다) */
+/* 남색 카드 위이므로 흰 버튼으로 뒤집는다 (기본 .btn-primary는 남색이라 묻힌다).
+   flex-shrink를 막지 않으면 좁은 화면에서 글자가 눌려 깨진다 (2026-08-08 실측). */
 .post-cta .btn {
+  flex: 0 0 auto;
   margin-left: auto;
   white-space: nowrap;
   background: #fff;
@@ -554,13 +616,13 @@ section.block { padding: 64px 0 0; }
   box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
 }
 .post-cta .btn:hover { background: #EAF2FB; color: var(--deep); }
-@media (max-width: 560px) {
-  .post-cta { flex-direction: column; align-items: stretch; }
-  .post-cta .btn { margin-left: 0; justify-content: center; }
+@media (max-width: 640px) {
+  .post-cta { flex-direction: column; align-items: stretch; gap: 18px; padding: 24px 22px; }
+  .post-cta .btn { margin-left: 0; width: 100%; justify-content: center; }
 }
 .post-back {
   display: inline-block;
-  margin: 0 0 100px;
+  margin: 34px 0 100px;
   color: var(--sub);
   font-size: .92rem;
   font-weight: 600;

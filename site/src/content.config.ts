@@ -11,6 +11,9 @@ const blog = defineCollection({
     description: z.string(),
     date: z.coerce.date(),
     category: z.enum(['report', 'release', 'notice']).default('report'),
+    /** 목록 카드 썸네일 (선택) — public 기준 경로. 예: '/blog/heat-40.png'
+     *  없으면 아래 stat 지표 칸이 대신 들어간다 (글마다 이미지를 만들 필요는 없다) */
+    thumbnail: z.string().optional(),
     /** 목록 카드에 띄우는 한 줄 지표 (선택) — 예: "40.0°" */
     stat: z.string().optional(),
     statLabel: z.string().optional(),
