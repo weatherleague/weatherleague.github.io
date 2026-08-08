@@ -588,37 +588,53 @@ section.block { padding: 64px 0 0; }
 .post-body td { padding: 11px 12px; border-bottom: 1px solid var(--line); }
 .post-body tbody tr:hover { background: rgba(46, 108, 180, .04); }
 
-/* 글 끝 앱 유도 + 뒤로 */
+/* 글 끝 앱 유도 + 뒤로 ─────────────────────────────────────────────
+   모든 글에 같은 문구·같은 모양으로 붙는 고정 영역이다 (문안은 [...slug].astro 한 곳).
+   ⚠ 화면 폭에 따라 배치를 뒤집지 않는다 — 항상 '가운데 세로 쌓기' 한 가지 형태만 쓴다.
+   종전에는 PC=가로 / 모바일=세로로 갈렸고, 창을 반으로 줄이면 가로 배치가 무너졌다.
+   여백은 breakpoint 대신 clamp로 폭에 따라 매끄럽게 줄어든다 (2026-08-08 개편). */
 .post-cta {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  flex-wrap: wrap;
-  margin: 44px 0 0;
-  padding: 28px 30px;
-  background: linear-gradient(135deg, #142A5D, #123976);
+  margin: 52px 0 0;
+  padding: clamp(32px, 5vw, 46px) clamp(20px, 4vw, 34px);
+  background: linear-gradient(135deg, #142A5D 0%, #132F65 34%, #13346E 67%, #123976 100%);
   border-radius: var(--radius);
   color: #fff;
+  text-align: center;
 }
-.post-cta-text { flex: 1 1 260px; min-width: 0; }
-.post-cta strong { display: block; font-size: 1.08rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -.03em; }
-.post-cta p { margin: 0; font-size: .92rem; line-height: 1.7; color: #C9DCF2; letter-spacing: -.03em; }
-.post-cta p b { color: #fff; font-weight: 700; }
-/* 남색 카드 위이므로 흰 버튼으로 뒤집는다 (기본 .btn-primary는 남색이라 묻힌다).
-   flex-shrink를 막지 않으면 좁은 화면에서 글자가 눌려 깨진다 (2026-08-08 실측). */
-.post-cta .btn {
-  flex: 0 0 auto;
-  margin-left: auto;
-  white-space: nowrap;
+.post-cta strong {
+  display: block;
+  font-size: clamp(1.14rem, 2.6vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  margin: 0 0 10px;
+  text-wrap: balance;
+}
+.post-cta p {
+  max-width: 30em;
+  margin: 0 auto 26px;
+  font-size: .95rem;
+  line-height: 1.75;
+  letter-spacing: -.03em;
+  color: rgba(255, 255, 255, .82);
+  text-wrap: pretty;
+}
+/* 남색 카드 위이므로 흰 버튼으로 뒤집는다.
+   ⚠ 안쪽 여백은 여기서 직접 준다 — .btn 기본 클래스에는 padding이 없다.
+   (종전 .btn-primary는 CSS에 아예 없는 클래스여서 글자가 버튼 가장자리에 붙었다) */
+.post-cta .btn-install {
+  padding: 13px 30px;
+  font-size: 1rem;
+  max-width: 100%;
   background: #fff;
   color: var(--brand);
   border: 0;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .25);
 }
-.post-cta .btn:hover { background: #EAF2FB; color: var(--deep); }
-@media (max-width: 640px) {
-  .post-cta { flex-direction: column; align-items: stretch; gap: 18px; padding: 24px 22px; }
-  .post-cta .btn { margin-left: 0; width: 100%; justify-content: center; }
+.post-cta .btn-install:hover {
+  background: #EAF2FB;
+  color: var(--deep);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .3);
 }
 .post-back {
   display: inline-block;

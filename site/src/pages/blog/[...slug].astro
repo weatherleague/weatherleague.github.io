@@ -31,12 +31,14 @@ const fmt = `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, '0')}. $
     </div>
 
     <div class="container narrow">
+      {/* 모든 글에 같은 문구로 붙는 고정 영역. 문안 변경은 이 한 곳만 고치면 전체 글에 반영된다. */}
       <div class="post-cta">
-        <div class="post-cta-text">
-          <strong>우리 동네 순위가 궁금하다면</strong>
-          <p>전국 순위는 여기서 보고, <b>우리 동네 1위</b>는 앱에서 확인하세요. 매일 아침 채점 결과를 알려드려요.</p>
-        </div>
-        <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.weatherleague.app">앱 받기</a>
+        <strong>우리 동네 날씨 순위가 궁금하다면?</strong>
+        <p>
+          우리 동네 1위 채널로 날씨를 알려주는 웨더리그 앱을 사용해보세요.<br />
+          매일 채점해서 결과를 알려드려요.
+        </p>
+        <a class="btn btn-install" href="https://play.google.com/store/apps/details?id=com.weatherleague.app">앱 설치하기</a>
       </div>
       <a class="post-back" href={`${base}/blog/`}>← 블로그 목록으로</a>
     </div>
