@@ -77,5 +77,12 @@ const marked = series.filter((s) => s.highlight);
       }
     </svg>
   </div>
-  <p class="rt-help">위로 갈수록 높은 순위예요. 회색 선은 나머지 채널이고요.</p>
+  {/* 좁은 화면 전용 범례 — 모바일에서는 선 끝 이름표가 화면 밖으로 밀려 안 보인다.
+      (그래프를 억지로 줄이면 글자가 안 읽히므로 상자 안 가로 스크롤은 유지하고,
+       이름만 아래로 내려 스크롤 없이도 누가 누구인지 알 수 있게 한다) */}
+  <ul class="rt-legend">
+    {marked.map((s) => <li class={`rt-c${s.highlight}`}>{s.name}</li>)}
+    <li class="rt-c0">나머지 채널</li>
+  </ul>
+  <p class="rt-help">위로 갈수록 높은 순위예요.</p>
 </figure>
