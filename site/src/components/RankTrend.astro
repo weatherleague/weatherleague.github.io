@@ -1,0 +1,81 @@
+---
+/** 날짜별 순위 변동 선 그래프 (주가 차트 형태) — Y축 순위, X축 날짜.
+ *
+ *  왜 SVG인가: 막대(LeagueChart)는 CSS로 그리는 게 낫지만, 꺾은선은 좌표를 이어야 해서
+ *  SVG가 맞다. 외부 차트 라이브러리는 쓰지 않는다 — 정적 사이트에 수십 KB짜리 번들을
+ *  들이느니 선 몇 개는 직접 그리는 게 싸다.
+ *
+ *  ⚠ Y축은 **위가 1위**다(순위는 작을수록 좋다). 값 축이 아니라 등수 축이므로 뒤집는다.
+ *  ⚠ 선이 11개면 다 진하게 그릴 때 아무것도 안 보인다. 그래서 **말하려는 채널만 강조**하고
+ *    나머지는 옅은 회색으로 배경에 깐다 — 배경 선도 "다들 요동쳤다"는 정보를 준다.
+ *  ⚠ 날짜 간격은 등간격으로 둔다. 빠진 날(8/7 등)은 축 라벨에 아예 나오지 않으므로
+ *    "그날은 없다"가 눈에 보인다 — 없는 날을 가짜로 이어 그리지 않는다.
+ */
+interface Props {
+  caption: string;
+  /** X축 라벨 (예: ['8/3','8/4','8/5','8/6','8/8']) */
+  dates: string[];
+  /** 채널별 순위 궤적. ranks 길이 = dates 길이. highlight 준 것만 색·이름이 붙는다 */
+  series: { name: string; ranks: number[]; highlight?: 1 | 2 }[];
+}
+const { caption, dates, series } = Astro.props;
+
+const W = 720;
+const H = 300;
+const PAD = { l: 30, r: 96, t: 14, b: 28 };
+const plotW = W - PAD.l - PAD.r;
+const plotH = H - PAD.t - PAD.b;
+const maxRank = Math.max(...series.flatMap((s) => s.ranks));
+
+const x = (i: number) => PAD.l + (i * plotW) / (dates.length - 1);
+const y = (r: number) => PAD.t + ((r - 1) * plotH) / (maxRank - 1);
+const path = (ranks: number[]) =>
+  ranks.map((r, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(r).toFixed(1)}`).join(' ');
+
+/** 가로 눈금은 1위부터 두 칸씩 — 11개 다 그으면 격자가 그림을 덮는다 */
+const ticks = Array.from({ length: maxRank }, (_, i) => i + 1).filter((r) => r % 2 === 1);
+const plain = series.filter((s) => !s.highlight);
+const marked = series.filter((s) => s.highlight);
+---
+
+<figure class="rank-trend">
+  <figcaption>{caption}</figcaption>
+  <div class="rt-scroll">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={caption}>
+      {/* 눈금선 + 순위 라벨 */}
+      {
+        ticks.map((r) => (
+          <g>
+            <line x1={PAD.l} y1={y(r)} x2={PAD.l + plotW} y2={y(r)} class="rt-grid" />
+            <text x={PAD.l - 8} y={y(r) + 4} class="rt-axis" text-anchor="end">{r}</text>
+          </g>
+        ))
+      }
+      {/* 날짜 라벨 */}
+      {
+        dates.map((d, i) => (
+          <text x={x(i)} y={H - 8} class="rt-axis" text-anchor="middle">{d}</text>
+        ))
+      }
+      {/* 배경 선 — 강조하지 않은 채널 */}
+      {plain.map((s) => <path d={path(s.ranks)} class="rt-line rt-plain" />)}
+      {/* 강조 선 + 점 + 끝 이름표 */}
+      {
+        marked.map((s) => (
+          <g class={`rt-mark rt-c${s.highlight}`}>
+            <path d={path(s.ranks)} class="rt-line" />
+            {s.ranks.map((r, i) => <circle cx={x(i)} cy={y(r)} r="3.6" />)}
+            <text
+              x={x(dates.length - 1) + 10}
+              y={y(s.ranks[s.ranks.length - 1]) + 4}
+              class="rt-name"
+            >
+              {s.name}
+            </text>
+          </g>
+        ))
+      }
+    </svg>
+  </div>
+  <p class="rt-help">위로 갈수록 높은 순위예요. 회색 선은 나머지 채널이고요.</p>
+</figure>

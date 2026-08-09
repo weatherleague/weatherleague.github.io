@@ -6,7 +6,8 @@ import { glob } from 'astro/loaders';
  *   report = 데이터 리포트(우리 채점 기록으로 쓴 글) · release = 업데이트 노트 · notice = 공지 */
 const blog = defineCollection({
   loader: glob({
-    pattern: '**/*.md',
+    // .mdx = 본문 중간에 그래프 조각을 부르는 글 (순위 변동 등). 나머지는 .md 그대로.
+    pattern: '**/*.{md,mdx}',
     base: './src/content/blog',
     /** 주소(URL)는 파일 이름이 아니라 머리말의 slug로 정한다 (운영자 확정 2026-08-08).
      *  파일 이름은 한글·날짜로 둬서 찾기 쉽게 하고, 밖으로 나가는 주소만 영문으로 만든다.
@@ -40,6 +41,24 @@ const blog = defineCollection({
         caption: z.string(),
         /** 내림차순으로 넣는다. value = 0~100 적중률 % */
         rows: z.array(z.object({ name: z.string(), value: z.number() })).min(2),
+      })
+      .optional(),
+    /** 날짜별 순위 변동 선 그래프 (선택) — 본문 중간에 놓는다.
+     *  위치를 레이아웃이 정할 수 없어서 글(.mdx)이 `<RankTrend {...frontmatter.trend} />`로
+     *  직접 부른다. 숫자는 여기 머리말에 두는 것이 원칙 — 자동 생성기가 YAML만 쓰면 되게. */
+    trend: z
+      .object({
+        caption: z.string(),
+        /** X축 라벨. 예: ['8/3','8/4','8/5','8/6','8/8'] */
+        dates: z.array(z.string()).min(2),
+        /** ranks 길이 = dates 길이. highlight를 준 채널만 색·이름표가 붙는다(최대 2개 권장) */
+        series: z.array(
+          z.object({
+            name: z.string(),
+            ranks: z.array(z.number()),
+            highlight: z.union([z.literal(1), z.literal(2)]).optional(),
+          })
+        ),
       })
       .optional(),
     /** 글 끝 "데이터 기준" 블록 (선택) — 고정 문구는 레이아웃이 갖고 있고

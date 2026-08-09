@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import mdx from '@astrojs/mdx';
 
 /** 미리보기(dev) 빌드 전용 설정 — `npm run build:preview`
  *
@@ -19,4 +20,7 @@ export default defineConfig({
   site: 'https://weatherleague.github.io',
   base: '/preview',
   outDir: './dist-preview',
+  // ⚠ mdx는 본 빌드와 **반드시 같이** 들고 있어야 한다 — 빠지면 .mdx 글이
+  //   미리보기에서만 안 나온다(확인하려고 만든 사본이 확인을 못 하는 상태가 된다).
+  integrations: [mdx()],
 });

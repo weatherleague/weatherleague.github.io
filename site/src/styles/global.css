@@ -669,6 +669,41 @@ section.block { padding: 64px 0 0; }
   .league-chart li { grid-template-columns: 1.2em minmax(0, 6.4em) 1fr 3.3em; gap: 7px; font-size: .86rem; }
 }
 
+/* 순위 변동 선 그래프 ──────────────────────────────────────────────
+   RankTrend.astro. 본문 중간에 들어가는 고정 요소.
+   ⚠ 좁은 화면에서 억지로 줄이면 글자가 안 읽힌다 → 최소 폭을 주고 그 안에서 가로 스크롤.
+     (페이지 전체가 가로로 밀리지 않도록 스크롤은 이 상자 안에서만 일어난다) */
+.rank-trend {
+  margin: 0 0 1.6em;
+  padding: clamp(18px, 3vw, 24px) clamp(14px, 2.6vw, 22px) 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.rank-trend figcaption {
+  margin-bottom: 12px;
+  color: var(--sub);
+  font-size: .88rem;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+.rt-scroll { overflow-x: auto; }
+.rank-trend svg { display: block; width: 100%; min-width: 460px; height: auto; }
+.rt-grid { stroke: rgba(22, 48, 79, .1); stroke-width: 1; }
+.rt-axis { fill: var(--muted); font-size: 12px; letter-spacing: -.02em; }
+.rt-line { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.rt-plain { stroke: #C3D3E3; stroke-width: 1.5; }
+/* 강조 2색 — 셋 이상 강조하면 다시 스파게티가 된다 */
+.rt-mark .rt-line { stroke-width: 2.6; }
+.rt-mark circle { stroke: var(--bg-soft); stroke-width: 1.6; }
+.rt-name { font-size: 12.5px; font-weight: 700; letter-spacing: -.03em; }
+.rt-c1 .rt-line { stroke: var(--brand); }
+.rt-c1 circle, .rt-c1 .rt-name { fill: var(--brand); }
+.rt-c2 .rt-line { stroke: var(--gold); }
+.rt-c2 circle, .rt-c2 .rt-name { fill: #A9761F; }
+.rt-c2 circle { fill: var(--gold); }
+.rt-help { margin: 10px 0 0; color: var(--muted); font-size: .82rem; letter-spacing: -.03em; }
+
 /* 글 끝 "데이터 기준" ──────────────────────────────────────────────
    모든 데이터 리포트에 같은 모양으로 붙는 고정 영역 (SourceNote.astro).
    종전에는 <small> 한 덩어리라 줄바꿈 없이 붙어 읽기 어려웠다. */
