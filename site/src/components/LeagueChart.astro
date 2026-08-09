@@ -1,0 +1,36 @@
+---
+/** 주간 리그 순위 막대 그래프 — 주간 연재의 고정 요소.
+ *
+ *  왜 컴포넌트인가: 매주 같은 모습이어야 한다. 글마다 표나 그림을 새로 만들면
+ *  몇 주 안에 서로 다른 모양이 섞인다(글 끝 CTA를 레이아웃에 둔 것과 같은 이유).
+ *  글은 머리말에 **숫자만** 준다 — 색·정렬·여백은 전부 여기가 정한다.
+ *
+ *  SVG가 아니라 HTML+CSS로 그린다: 가로 막대는 폭에 따라 늘었다 줄었다 해야 하는데
+ *  그건 CSS가 잘하는 일이고, 글자도 본문과 같은 폰트로 자동으로 맞는다.
+ *
+ *  ⚠ 막대 길이 = 적중률 %를 그대로 쓴다(0~100). 차이를 커 보이게 하려고
+ *    최솟값을 잘라 늘리지 않는다 — 채점 서비스가 눈속임을 하면 안 된다.
+ */
+interface Props {
+  caption: string;
+  rows: { name: string; value: number }[];
+}
+const { caption, rows } = Astro.props;
+const top = Math.max(...rows.map((r) => r.value));
+---
+
+<figure class="league-chart">
+  <figcaption>{caption}</figcaption>
+  <ol>
+    {
+      rows.map((r, i) => (
+        <li class={r.value === top ? 'is-top' : ''}>
+          <span class="rk">{i + 1}</span>
+          <span class="nm">{r.name}</span>
+          <span class="br"><i style={`width:${r.value}%`} /></span>
+          <span class="vl">{r.value.toFixed(1)}%</span>
+        </li>
+      ))
+    }
+  </ol>
+</figure>

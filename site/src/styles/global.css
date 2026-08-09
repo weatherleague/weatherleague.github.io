@@ -588,6 +588,119 @@ section.block { padding: 64px 0 0; }
 .post-body td { padding: 11px 12px; border-bottom: 1px solid var(--line); }
 .post-body tbody tr:hover { background: rgba(46, 108, 180, .04); }
 
+/* 주간 리그 순위 그래프 ────────────────────────────────────────────
+   본문 위에 오는 고정 요소 (LeagueChart.astro). 매주 같은 모습이어야 하므로
+   모양은 전부 여기서 정하고 글은 숫자만 준다.
+   막대 길이 = 적중률 %를 그대로 쓴다 (축을 잘라 차이를 부풀리지 않는다). */
+.league-chart {
+  margin: 0 0 12px;
+  padding: clamp(20px, 3.4vw, 28px) clamp(16px, 3vw, 26px);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.league-chart figcaption {
+  margin-bottom: 16px;
+  color: var(--sub);
+  font-size: .88rem;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+.league-chart ol { margin: 0; padding: 0; list-style: none; }
+.league-chart li {
+  display: grid;
+  grid-template-columns: 1.4em minmax(0, 8.2em) 1fr 3.6em;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: .92rem;
+  letter-spacing: -.03em;
+}
+.league-chart .rk { color: var(--muted); font-size: .8rem; text-align: right; }
+.league-chart .nm {
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.league-chart .br {
+  height: 11px;
+  background: rgba(22, 48, 79, .07);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.league-chart .br i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sky), var(--blue));
+}
+.league-chart .vl {
+  color: var(--sub);
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+/* 1위만 진하게 — 등수 표시는 숫자가 이미 하므로 색으로 한 번만 더 짚어 준다 */
+.league-chart .is-top .nm, .league-chart .is-top .vl { color: var(--brand); font-weight: 700; }
+.league-chart .is-top .br i { background: linear-gradient(90deg, var(--blue), var(--brand)); }
+@media (max-width: 520px) {
+  .league-chart li { grid-template-columns: 1.2em minmax(0, 6.4em) 1fr 3.3em; gap: 7px; font-size: .86rem; }
+}
+
+/* 글 끝 "데이터 기준" ──────────────────────────────────────────────
+   모든 데이터 리포트에 같은 모양으로 붙는 고정 영역 (SourceNote.astro).
+   종전에는 <small> 한 덩어리라 줄바꿈 없이 붙어 읽기 어려웠다. */
+.source-note {
+  margin: 44px 0 0;
+  padding: clamp(20px, 3.4vw, 26px) clamp(18px, 3vw, 26px);
+  background: var(--bg-soft);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: .86rem;
+  line-height: 1.75;
+  letter-spacing: -.03em;
+}
+.source-note h2 {
+  margin: 0 0 14px;
+  color: var(--sub);
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.source-note dl { margin: 0 0 14px; }
+.source-note dl > div { display: flex; gap: 12px; padding: 3px 0; }
+.source-note dt {
+  flex: 0 0 5.4em;
+  color: var(--sub);
+  font-weight: 700;
+}
+.source-note dd { margin: 0; }
+.source-note ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.source-note li {
+  position: relative;
+  margin: 0;
+  padding: 7px 0 7px 13px;
+  text-wrap: pretty;
+}
+.source-note li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 15px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: .55;
+}
+/* 그 글에만 해당하는 단서는 한 단계 더 눈에 띄게 (제외한 채널·빠진 날 등) */
+.source-note li.own { color: var(--sub); }
+@media (max-width: 520px) {
+  .source-note dl > div { flex-direction: column; gap: 0; }
+  .source-note dt { flex: none; }
+}
+
 /* 글 끝 앱 유도 + 뒤로 ─────────────────────────────────────────────
    모든 글에 같은 문구·같은 모양으로 붙는 고정 영역이다 (문안은 [...slug].astro 한 곳).
    ⚠ 화면 폭에 따라 배치를 뒤집지 않는다 — 항상 '가운데 세로 쌓기' 한 가지 형태만 쓴다.

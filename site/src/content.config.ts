@@ -32,6 +32,26 @@ const blog = defineCollection({
     /** 목록 카드에 띄우는 한 줄 지표 (선택) — 예: "40.0°" */
     stat: z.string().optional(),
     statLabel: z.string().optional(),
+    /** 주간 리그 순위 그래프 (선택) — 있으면 본문 위에 고정 형태로 그려진다.
+     *  ⚠ 모양·색·정렬은 레이아웃이 정한다. 여기엔 **숫자만** 넣는다
+     *  (주간 연재가 매번 같은 모습이어야 해서 — CTA와 같은 원칙). */
+    league: z
+      .object({
+        caption: z.string(),
+        /** 내림차순으로 넣는다. value = 0~100 적중률 % */
+        rows: z.array(z.object({ name: z.string(), value: z.number() })).min(2),
+      })
+      .optional(),
+    /** 글 끝 "데이터 기준" 블록 (선택) — 고정 문구는 레이아웃이 갖고 있고
+     *  글마다 달라지는 것(기간·표본·이번 글만의 단서)만 여기서 준다. */
+    source: z
+      .object({
+        period: z.string(),
+        scope: z.string(),
+        /** 이 글에만 해당하는 단서. 한 줄에 하나씩 */
+        notes: z.array(z.string()).default([]),
+      })
+      .optional(),
     draft: z.boolean().default(false),
   }),
 });

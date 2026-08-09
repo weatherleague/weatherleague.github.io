@@ -2,6 +2,8 @@
 import Base from '../../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
 import { CATEGORY } from '../../lib/category';
+import LeagueChart from '../../components/LeagueChart.astro';
+import SourceNote from '../../components/SourceNote.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -58,11 +60,27 @@ const jsonLd = JSON.stringify({
       </div>
     </header>
 
+    {/* 순위 그래프는 본문 **위**에 고정으로 온다 — 주간 연재를 열었을 때
+        가장 먼저 보여야 하는 것이 그 주의 순위이기 때문. 머리말에 league가 없는 글
+        (공지·업데이트 노트 등)에서는 통째로 빠진다. */}
+    {post.data.league && (
+      <div class="container narrow">
+        <LeagueChart caption={post.data.league.caption} rows={post.data.league.rows} />
+      </div>
+    )}
+
     <div class="container narrow post-body">
       <Content />
     </div>
 
     <div class="container narrow">
+      {post.data.source && (
+        <SourceNote
+          period={post.data.source.period}
+          scope={post.data.source.scope}
+          notes={post.data.source.notes}
+        />
+      )}
       {/* 모든 글에 같은 문구로 붙는 고정 영역. 문안 변경은 이 한 곳만 고치면 전체 글에 반영된다. */}
       <div class="post-cta">
         <strong>우리 동네 날씨 순위가 궁금하다면?</strong>
