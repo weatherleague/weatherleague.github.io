@@ -28,6 +28,10 @@ const {
   image,
 } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+/** 미리보기(dev) 사본인가 — base가 /preview면 초안까지 들어 있는 확인용 빌드다.
+ *  ⚠ 이 사본은 **검색에 절대 노출되면 안 된다**: noindex(아래) + robots.txt Disallow +
+ *    사이트맵 미생성, 3중으로 막는다. 판단 기준은 astro.preview.config.mjs 주석 참조. */
+const isPreview = base === '/preview';
 // 방침·약관은 별도 저장소(weatherleague-policy)에 남는다 — Play Console 등록 URL 보존
 const POLICY = '/weatherleague-policy';
 const canonical = new URL(base + path, Astro.site).href;
@@ -46,7 +50,7 @@ const MAIL = 'contact.weatherleague@gmail.com';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {isPreview ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/png" href={`${base}/icon.png`} />
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="웨더리그" />
@@ -70,6 +74,14 @@ const MAIL = 'contact.weatherleague@gmail.com';
     </noscript>
   </head>
   <body>
+    {
+      isPreview && (
+        <div class="preview-bar">
+          미리보기 — 발행 전 초안이 포함된 확인용 사본입니다. 검색에는 잡히지 않아요.
+          <a href="https://weatherleague.github.io/">실제 사이트로</a>
+        </div>
+      )
+    }
     <header class="site-header">
       <div class="container header-inner">
         <a class="logo" href={`${base}/`}>

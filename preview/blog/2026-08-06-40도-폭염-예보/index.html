@@ -1,0 +1,33 @@
+<!doctype html>
+<!--
+  옛 주소 → 새 주소 전달 페이지 (2026-08-08).
+
+  글 주소를 한글 제목에서 영문 slug로 바꾸면서, 이미 나가 있던 옛 주소가 죽지 않도록 남긴다.
+  GitHub Pages에는 서버측 301 전달 기능이 없어 이런 껍데기 페이지가 유일한 방법이다.
+
+  ⚠ 이 파일은 반드시 site/public/ 아래에 둔다 — 저장소 루트(배포본)에만 두면
+     다음 빌드 결과를 루트로 복사할 때 사라진다. public/은 빌드마다 그대로 복사된다.
+  ⚠ 앞으로 발행한 글의 주소는 바꾸지 않는다 (머리말 slug 고정). 이 파일은 주소 체계를
+     정하기 전에 하루 나가 있던 첫 글에 대한 일회성 처리다.
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이동합니다 — 웨더리그</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://weatherleague.github.io/blog/heatwave-40c-forecast-check/">
+<meta http-equiv="refresh" content="0; url=/blog/heatwave-40c-forecast-check/">
+<script>location.replace("/blog/heatwave-40c-forecast-check/" + location.hash);</script>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+         font-family: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif;
+         color: #16304F; text-align: center; padding: 24px; }
+  a { color: #123976; }
+</style>
+</head>
+<body>
+  <p>글 주소가 바뀌었습니다.<br>
+    <a href="/blog/heatwave-40c-forecast-check/">40도의 날, 13개 예보는 얼마나 맞혔을까 →</a>
+  </p>
+</body>
+</html>

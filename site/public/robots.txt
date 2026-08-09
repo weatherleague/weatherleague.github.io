@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+# 미리보기 사본 — 발행 전 초안이 들어 있어 검색에 잡히면 안 된다.
+# (각 페이지의 noindex + 사이트맵 미생성과 함께 3중 차단)
+Disallow: /preview/
+
 Sitemap: https://weatherleague.github.io/sitemap-index.xml

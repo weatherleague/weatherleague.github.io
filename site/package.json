@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:preview": "astro build --config astro.preview.config.mjs",
     "preview": "astro preview"
   },
   "dependencies": {

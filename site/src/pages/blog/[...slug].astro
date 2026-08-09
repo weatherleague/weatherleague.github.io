@@ -4,9 +4,11 @@ import { getCollection, render } from 'astro:content';
 import { CATEGORY } from '../../lib/category';
 import LeagueChart from '../../components/LeagueChart.astro';
 import SourceNote from '../../components/SourceNote.astro';
+import { SHOW_DRAFTS } from '../../lib/posts';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  // 초안 포함 여부는 lib/posts.ts의 SHOW_DRAFTS 한 곳에서만 판단한다 (목록과 같은 기준)
+  const posts = await getCollection('blog', ({ data }) => SHOW_DRAFTS || !data.draft);
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 

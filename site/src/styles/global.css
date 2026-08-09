@@ -418,6 +418,27 @@ section.block { padding: 64px 0 0; }
 .cat-report { background: #EAF2FB; color: #1B4F8F; }
 .cat-release { background: #E7F4EC; color: #14683A; }
 .cat-notice { background: #FBF1DF; color: #96650F; }
+/* 초안 표시 — 미리보기 사본에서만 나온다 (본 빌드에는 초안이 들어오지 않음) */
+.cat-draft { background: #FBE9E7; color: #A5372A; }
+
+/* 미리보기 사본 알림 띠 — /preview/ 빌드에서만 body 맨 위에 붙는다.
+   "지금 보는 게 실제 사이트가 아니다"를 한눈에 알리는 것이 유일한 목적이라
+   본 사이트 색이 아닌 경고색을 쓴다. */
+.preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  background: #A5372A;
+  color: #fff;
+  font-size: .84rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  text-align: center;
+}
+.preview-bar a { color: #fff; text-underline-offset: 3px; }
 
 /* ─── 블로그: 카테고리 칩 (클라이언트 필터) ─── */
 .chips {
