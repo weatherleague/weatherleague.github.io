@@ -13,9 +13,41 @@ const { Content } = await render(post);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const d = post.data.date;
 const fmt = `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, '0')}. ${String(d.getDate()).padStart(2, '0')}`;
+
+/** 구조화 데이터 — 검색엔진에 "이 페이지는 블로그 글이고, 제목·발행일·발행처는 이렇다"를
+ *  기계가 읽는 형식으로 알려준다 (2026-08-09 신설. 그전에는 랜딩에만 있었다).
+ *  머리말(title·description·date)에서 그대로 뽑으므로 글마다 따로 손댈 것이 없다. */
+const site = Astro.site!.href.replace(/\/$/, '');
+const postUrl = `${site}${base}/blog/${post.id}/`;
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: d.toISOString(),
+  dateModified: d.toISOString(),
+  mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+  url: postUrl,
+  image: `${site}${base}${post.data.thumbnail ?? '/og-2608.png'}`,
+  inLanguage: 'ko-KR',
+  author: { '@type': 'Organization', name: '웨더리그', url: `${site}${base}/` },
+  publisher: {
+    '@type': 'Organization',
+    name: '웨더리그',
+    logo: { '@type': 'ImageObject', url: `${site}${base}/icon.png` },
+  },
+});
 ---
 
-<Base title={`${post.data.title} — 웨더리그`} description={post.data.description} path={`/blog/${post.id}/`}>
+<Base
+  title={`${post.data.title} — 웨더리그`}
+  description={post.data.description}
+  path={`/blog/${post.id}/`}
+  ogType="article"
+  publishedTime={d.toISOString()}
+  image={post.data.thumbnail}
+  {jsonLd}
+>
   <article class="post">
     <header class="post-hero">
       <div class="container narrow">

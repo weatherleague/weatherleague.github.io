@@ -8,9 +8,25 @@ interface Props {
   path?: string;
   /** JSON-LD 등 head에 추가할 구조화 데이터 (문자열) */
   jsonLd?: string;
+  /** 문서 종류. **글 상세만 'article'**, 나머지(랜딩·목록)는 'website'.
+   *  카톡·페이스북 미리보기와 검색엔진이 "이건 기사다"를 이걸로 구분한다
+   *  (2026-08-09 신설 — 그전에는 글 상세도 website로 나가고 있었다). */
+  ogType?: 'website' | 'article';
+  /** 발행일 ISO 문자열 — ogType이 'article'일 때만 쓴다 */
+  publishedTime?: string;
+  /** 이 페이지 전용 미리보기 이미지 (public 기준 경로). 없으면 사이트 공통 og 이미지 */
+  image?: string;
 }
 
-const { title, description, path = '/', jsonLd } = Astro.props;
+const {
+  title,
+  description,
+  path = '/',
+  jsonLd,
+  ogType = 'website',
+  publishedTime,
+  image,
+} = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // 방침·약관은 별도 저장소(weatherleague-policy)에 남는다 — Play Console 등록 URL 보존
 const POLICY = '/weatherleague-policy';
@@ -18,7 +34,7 @@ const canonical = new URL(base + path, Astro.site).href;
 // 링크 미리보기 이미지. ⚠ **교체할 때는 파일명을 바꾼다** — 카톡·페이스북 등이
 // URL 단위로 미리보기를 며칠 캐시하므로, 같은 이름으로 덮으면 옛 이미지가 계속 뜬다
 // (2026-08-08 교체: og.png → og-2608.png, 구 파일은 이력용으로 남겨 둠).
-const ogImage = new URL(`${base}/og-2608.png`, Astro.site).href;
+const ogImage = new URL(`${base}${image ?? '/og-2608.png'}`, Astro.site).href;
 const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.weatherleague.app';
 const MAIL = 'contact.weatherleague@gmail.com';
 ---
@@ -32,12 +48,15 @@ const MAIL = 'contact.weatherleague@gmail.com';
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/png" href={`${base}/icon.png`} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="웨더리그" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    {ogType === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
     <meta name="twitter:card" content="summary_large_image" />
     <link
       rel="stylesheet"
