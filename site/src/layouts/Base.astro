@@ -78,7 +78,7 @@ const MAIL = 'contact.weatherleague@gmail.com';
       isPreview && (
         <div class="preview-bar">
           미리보기 — 발행 전 초안이 포함된 확인용 사본입니다. 검색에는 잡히지 않아요.
-          <a href="https://weatherleague.github.io/">실제 사이트로</a>
+          <a href="https://weatherleague.kr/">실제 사이트로</a>
         </div>
       )
     }
@@ -90,7 +90,14 @@ const MAIL = 'contact.weatherleague@gmail.com';
         </a>
         <nav class="nav" aria-label="주 메뉴">
           <a class="nav-link" href={`${base}/blog/`}>블로그</a>
-          <a class="btn btn-navy" href={`mailto:${MAIL}?subject=${encodeURIComponent('[웨더리그 제휴 문의]')}`}>제휴 문의</a>
+          {/* ⚠ mailto는 **메일 앱이 없는 PC에서 아무 반응도 하지 않는다**(윈도우 실측 2026-08-10).
+              누른 사람 입장에선 버튼이 고장 난 것으로 보인다. 그래서 누를 때 주소를 클립보드에
+              함께 복사하고 안내를 띄운다 — 메일 앱이 열리면 그대로 쓰면 되고,
+              안 열려도 주소는 손에 남는다. (스크립트는 body 끝) */}
+          <a
+            class="btn btn-navy"
+            href={`mailto:${MAIL}?subject=${encodeURIComponent('[웨더리그 제휴 문의]')}`}
+            data-mail={MAIL}>제휴 문의</a>
         </nav>
       </div>
     </header>
@@ -109,7 +116,9 @@ const MAIL = 'contact.weatherleague@gmail.com';
         <nav class="f-links" aria-label="사이트 정보">
           <a href={`${POLICY}/privacy.html`}>개인정보처리방침</a>
           <a href={`${POLICY}/terms.html`}>이용약관</a>
-          <a href={`mailto:${MAIL}`}>문의</a>
+          {/* 종전엔 '문의'라는 글자만 있어서, 메일 앱이 없는 PC에서는 주소를 알 길이 아예 없었다.
+              주소를 그대로 적어 두면 눌러도 되고 복사해 가도 된다. */}
+          <a href={`mailto:${MAIL}`} data-mail={MAIL}>{MAIL}</a>
         </nav>
       </div>
     </footer>
@@ -131,6 +140,46 @@ const MAIL = 'contact.weatherleague@gmail.com';
         { threshold: 0.12, rootMargin: '0px 0px -30px 0px' }
       );
       document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+
+      // 메일 링크: 누를 때 주소를 클립보드에 복사하고, 무슨 일이 있었는지 알린다.
+      //
+      // 왜: mailto는 기본 메일 앱이 지정되지 않은 PC에서 **아무 일도 일어나지 않는다**
+      //     (윈도우 실측 2026-08-10). 누른 사람에겐 버튼이 고장 난 것으로 보인다.
+      //     mailto 자체는 막지 않는다 — 메일 앱이 있으면 평소대로 열린다.
+      //
+      // ⚠ 안내는 **복사 성공 여부와 무관하게 항상** 띄운다. 복사가 실패했을 때만 조용하면
+      //   원래 고치려던 그 증상(눌러도 아무 반응 없음)이 그대로 재현된다.
+      //   복사는 브라우저 정책상 실패할 수 있다(권한·포커스). 그때는 주소를 읽어 가면 된다.
+      let toastTimer: number | undefined;
+
+      function showToast(msg: string) {
+        let t = document.getElementById('mailToast');
+        if (!t) {
+          t = document.createElement('div');
+          t.id = 'mailToast';
+          t.className = 'mail-toast';
+          t.setAttribute('role', 'status');
+          document.body.appendChild(t);
+        }
+        t.textContent = msg;
+        t.classList.add('on');
+        clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => t?.classList.remove('on'), 4000);
+      }
+
+      document.querySelectorAll<HTMLAnchorElement>('a[data-mail]').forEach((el) => {
+        el.addEventListener('click', async () => {
+          const addr = el.dataset.mail || '';
+          let copied = false;
+          try {
+            await navigator.clipboard.writeText(addr);
+            copied = true;
+          } catch {
+            copied = false;
+          }
+          showToast(copied ? `메일 주소를 복사했어요 — ${addr}` : `메일 주소: ${addr}`);
+        });
+      });
     </script>
   </body>
 </html>

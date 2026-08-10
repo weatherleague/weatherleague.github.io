@@ -5,4 +5,4 @@ Allow: /
 # (각 페이지의 noindex + 사이트맵 미생성과 함께 3중 차단)
 Disallow: /preview/
 
-Sitemap: https://weatherleague.github.io/sitemap-index.xml
+Sitemap: https://weatherleague.kr/sitemap-index.xml

@@ -17,7 +17,7 @@ import mdx from '@astrojs/mdx';
  *                           robots.txt의 Disallow + 각 페이지 noindex와 3중으로 막는다.
  */
 export default defineConfig({
-  site: 'https://weatherleague.github.io',
+  site: 'https://weatherleague.kr',
   base: '/preview',
   outDir: './dist-preview',
   // ⚠ mdx는 본 빌드와 **반드시 같이** 들고 있어야 한다 — 빠지면 .mdx 글이
