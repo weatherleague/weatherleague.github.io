@@ -278,14 +278,17 @@ export function getStaticPaths() {
     const sidoOn = vb.w > VB.w / 2.2;
     lblSido.style.display = sidoOn ? '' : 'none';
     if (sidoOn) {
-      lblSido.style.fontSize = `${13.5 * scale}px`;
-      lblSido.style.strokeWidth = `${3 * scale}px`;
+      lblSido.style.fontSize = `${14.5 * scale}px`;
+      lblSido.style.strokeWidth = `${3.2 * scale}px`;
+      lblSido.style.fontWeight = '700';
     }
     lblSgg.style.fontSize = `${11.5 * scale}px`;
     lblSgg.style.strokeWidth = `${3 * scale}px`;
     for (const t of lblSgg.children) {
-      // 그 지역의 화면 폭이 라벨을 감당할 때만 표시 → 확대할수록 자연스럽게 등장
-      t.style.display = (+t.dataset.w / scale) > 58 ? '' : 'none';
+      // 전국 축척(광역 라벨이 떠 있는 동안)에는 숨기고, 확대해서 그 지역이
+      // 화면에서 충분히 커졌을 때만 등장 (v3 실측: 문턱 58px는 전국 화면에서
+      // 큰 군들이 전부 통과해 지도가 글자로 덮였다)
+      t.style.display = !sidoOn && (+t.dataset.w / scale) > 110 ? '' : 'none';
     }
   }
 
