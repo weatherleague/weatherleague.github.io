@@ -1,9 +1,13 @@
 ---
-// 리그 현황 탭 — 시제품 v2 (2026-08-11, 미리보기 전용)
+// 리그 현황 탭 — 시제품 v3 (2026-08-11, 미리보기 전용)
 //
 // ⚠ 이 페이지는 **미리보기 빌드에서만 생성된다** (아래 getStaticPaths 게이트).
 //   본 사이트 공개 게이트 = "v4 종합순위 공개 가능 상태" (BACKLOG 웹 트랙 ③).
 //   데이터는 전부 데모(고정 시드 더미) — 실제 순위를 싣지 않는다.
+// v3 개정 (운영자 실기기 피드백 2026-08-11 밤):
+//   바텀시트 폐기 → 지도 하단 얇은 HUD 카드 / 줌 레벨별 지명 라벨 /
+//   Top3 색 네모 → 앱과 같은 국기·채널 아이콘(이모지 금지 원칙 동일) /
+//   UI 이모지 → 벡터 아이콘 / 내 위치 = 정확도 표시 + 낮으면 자동 선택 안 함
 // 자산 생성기: 비공개 저장소 pipeline/build_league_map_assets.py
 import Base from '../../layouts/Base.astro';
 import LeagueMapSvg from '../../components/LeagueMapSvg.astro';
@@ -25,17 +29,28 @@ export function getStaticPaths() {
     <div class="container">
       <h1>우리 동네 1위 날씨 채널</h1>
       <p class="lg-note">
-        시제품 v2 — <b>화면의 순위·점수는 전부 데모(무작위)입니다.</b>
+        시제품 v3 — <b>화면의 순위·점수는 전부 데모(무작위)입니다.</b>
         지도를 확대하고, 지역을 눌러 보세요.
       </p>
 
       <div class="lg-toolbar">
         <div class="lg-search">
+          <svg class="lg-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/>
+          </svg>
           <input id="lgQ" type="search" placeholder="시·군·구 검색 (예: 마포)"
                  autocomplete="off" aria-label="시군구 검색" />
           <div id="lgQList" class="lg-qlist" hidden></div>
         </div>
-        <button id="lgLoc" class="lg-btn" type="button">📍 내 위치</button>
+        <button id="lgLoc" class="lg-btn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10Z"/>
+            <circle cx="12" cy="11" r="2.4"/>
+          </svg>
+          내 위치
+        </button>
         <div class="lg-demo-toggle" role="group" aria-label="상태 데모">
           <button id="lgModeOpen" class="lg-chip on" type="button">공개 후</button>
           <button id="lgModeCol" class="lg-chip" type="button">수집 중</button>
@@ -45,21 +60,29 @@ export function getStaticPaths() {
       <div class="lg-mapwrap" id="lgWrap">
         <LeagueMapSvg />
         <div class="lg-zoom">
-          <button id="lgZin" class="lg-btn lg-sq" type="button" aria-label="확대">＋</button>
-          <button id="lgZout" class="lg-btn lg-sq" type="button" aria-label="축소">－</button>
-          <button id="lgZfit" class="lg-btn lg-sq" type="button" aria-label="전국 보기">⤢</button>
+          <button id="lgZin" class="lg-btn lg-sq" type="button" aria-label="확대">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button id="lgZout" class="lg-btn lg-sq" type="button" aria-label="축소">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+          </button>
+          <button id="lgZfit" class="lg-btn lg-sq" type="button" aria-label="전국 보기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/>
+            </svg>
+          </button>
         </div>
         <div id="lgTip" class="lg-tip" hidden></div>
         <div id="lgCard" class="lg-card" hidden></div>
+        <div id="lgHud" class="lg-hud" hidden></div>
       </div>
       <p class="lg-caption">각 지역은 현재 1위 채널의 색으로 표시됩니다 ·
         내 위치는 브라우저 안에서만 판정하며 좌표를 서버로 보내지 않아요.</p>
     </div>
 
-    <div id="lgSheet" class="lg-sheet" hidden>
-      <div class="lg-sheet-grip" aria-hidden="true"></div>
-      <div id="lgSheetBody"></div>
-    </div>
     <div id="lgToast" class="lg-toast" role="status"></div>
   </main>
 </Base>
@@ -71,9 +94,11 @@ export function getStaticPaths() {
   .lgv2 .lg-toolbar { display: flex; gap: 10px; align-items: center;
     flex-wrap: wrap; margin-bottom: 12px; }
   .lgv2 .lg-search { position: relative; flex: 1 1 220px; max-width: 340px; }
-  .lgv2 .lg-search input { width: 100%; padding: 10px 14px; font-size: 15px;
-    border: 1px solid #d9d8cf; border-radius: 10px; background: #fff;
-    font-family: inherit; }
+  .lgv2 .lg-search-ic { position: absolute; left: 12px; top: 50%; width: 16px;
+    height: 16px; transform: translateY(-50%); color: #8a897f; }
+  .lgv2 .lg-search input { width: 100%; padding: 10px 14px 10px 36px;
+    font-size: 15px; border: 1px solid #d9d8cf; border-radius: 10px;
+    background: #fff; font-family: inherit; }
   .lgv2 .lg-qlist { position: absolute; top: calc(100% + 4px); left: 0; right: 0;
     background: #fff; border: 1px solid #d9d8cf; border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,.09); z-index: 30; overflow: hidden; }
@@ -81,9 +106,11 @@ export function getStaticPaths() {
     padding: 10px 14px; border: 0; background: none; font: inherit;
     font-size: 14px; cursor: pointer; }
   .lgv2 .lg-qlist button:hover { background: #f4f3ec; }
-  .lgv2 .lg-btn { padding: 10px 14px; font-size: 14px; font-family: inherit;
+  .lgv2 .lg-btn { display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 14px; font-size: 14px; font-family: inherit;
     border: 1px solid #d9d8cf; border-radius: 10px; background: #fff;
-    cursor: pointer; }
+    cursor: pointer; color: #1d1d1b; }
+  .lgv2 .lg-btn svg { width: 16px; height: 16px; }
   .lgv2 .lg-btn:hover { background: #f4f3ec; }
   .lgv2 .lg-btn[disabled] { opacity: .5; cursor: wait; }
   .lgv2 .lg-demo-toggle { margin-left: auto; display: flex; gap: 4px;
@@ -101,14 +128,22 @@ export function getStaticPaths() {
   .lgv2 #lgMap path { stroke: #fff; stroke-width: .8; cursor: pointer;
     vector-effect: non-scaling-stroke; }
   .lgv2 #lgMap path.sel { stroke: #1d1d1b; stroke-width: 1.8; }
+  .lgv2 #lgMap text { pointer-events: none; font-family: inherit;
+    font-weight: 600; fill: #43423c; paint-order: stroke;
+    stroke: rgba(255,255,255,.86); text-anchor: middle; }
   .lgv2 .lg-zoom { position: absolute; right: 12px; top: 12px; display: flex;
     flex-direction: column; gap: 6px; }
-  .lgv2 .lg-sq { width: 40px; height: 40px; padding: 0; font-size: 18px;
-    line-height: 1; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .lgv2 .lg-sq { width: 40px; height: 40px; padding: 0; justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .lgv2 .lg-sq svg { width: 17px; height: 17px; }
   .lgv2 .lg-tip { position: absolute; pointer-events: none; background: #1d1d1b;
     color: #fff; font-size: 12.5px; padding: 5px 9px; border-radius: 7px;
     z-index: 20; white-space: nowrap; }
-  .lgv2 .lg-card { position: absolute; z-index: 25; width: 252px; background: #fff;
+  .lgv2 .lg-flag { width: 18px; height: 13px; object-fit: cover;
+    border-radius: 2.5px; box-shadow: 0 0 0 1px rgba(0,0,0,.10); flex: none; }
+  .lgv2 .lg-flag--sq { width: 15px; height: 15px; object-fit: contain;
+    border-radius: 0; box-shadow: none; }
+  .lgv2 .lg-card { position: absolute; z-index: 25; width: 256px; background: #fff;
     border: 1px solid #e0dfd6; border-radius: 13px; padding: 14px;
     box-shadow: 0 10px 30px rgba(0,0,0,.14); }
   .lgv2 .lg-cardhead { display: flex; align-items: baseline; gap: 8px;
@@ -124,8 +159,7 @@ export function getStaticPaths() {
     font-size: 11.5px; font-weight: 700; display: inline-flex;
     align-items: center; justify-content: center; background: #ecebe2;
     color: #6d6c64; }
-  .lgv2 .lg-row:first-of-type .lg-rank { background: #1c2b4a; color: #fff; }
-  .lgv2 .lg-dot { flex: none; width: 12px; height: 12px; border-radius: 4px; }
+  .lgv2 .lg-rank--top { background: #1c2b4a; color: #fff; }
   .lgv2 .lg-row .nm { flex: 1; letter-spacing: -0.02em; }
   .lgv2 .lg-row .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
   .lgv2 .lg-schead { font-size: 11px; color: #8a897f; text-align: right;
@@ -137,24 +171,37 @@ export function getStaticPaths() {
     font-size: 13.5px; color: #45443f; line-height: 1.55; }
   .lgv2 .lg-collect b { display: block; margin-bottom: 3px; }
   .lgv2 .lg-caption { font-size: 12.5px; color: #8a897f; margin-top: 10px; }
-  .lgv2 .lg-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
-    background: #fff; border-radius: 18px 18px 0 0;
-    box-shadow: 0 -8px 30px rgba(0,0,0,.18); padding: 8px 18px
-    calc(18px + env(safe-area-inset-bottom)); transform: translateY(105%);
-    transition: transform .22s ease; }
-  .lgv2 .lg-sheet.open { transform: none; }
-  .lgv2 .lg-sheet-grip { width: 38px; height: 4px; border-radius: 2px;
-    background: #d9d8cf; margin: 4px auto 10px; }
+  /* 모바일: 바텀시트 대신 지도 하단 얇은 HUD 카드 (지도를 가리지 않게) */
+  .lgv2 .lg-hud { position: absolute; left: 10px; right: 10px; bottom: 10px;
+    z-index: 25; background: rgba(255,255,255,.96); border: 1px solid #e0dfd6;
+    border-radius: 12px; padding: 9px 12px; box-shadow: 0 6px 20px rgba(0,0,0,.14);
+    backdrop-filter: blur(4px); }
+  .lgv2 .lg-hudhead { display: flex; align-items: baseline; gap: 7px;
+    padding-right: 22px; margin-bottom: 4px; }
+  .lgv2 .lg-hudhead b { font-size: 13.5px; letter-spacing: -0.02em; }
+  .lgv2 .lg-hudhead span { font-size: 10.5px; color: #8a897f; }
+  .lgv2 .lg-hrow { display: flex; align-items: center; gap: 7px; padding: 4px 0;
+    font-size: 13px; }
+  .lgv2 .lg-hrow + .lg-hrow { border-top: 1px solid #f2f1ea; }
+  .lgv2 .lg-hrow .lg-rank { width: 27px; height: 18px; font-size: 10.5px;
+    border-radius: 5px; }
+  .lgv2 .lg-hrow .nm { flex: 1; letter-spacing: -0.02em; }
+  .lgv2 .lg-hrow .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lgv2 .lg-hudcta { display: block; margin-top: 6px; font-size: 12px;
+    color: #1c2b4a; text-decoration: none; font-weight: 600; }
+  .lgv2 .lg-hud .lg-collect { padding: 9px 11px; font-size: 12.5px; }
   .lgv2 .lg-toast { position: fixed; left: 50%; bottom: 26px;
     transform: translateX(-50%); background: #1d1d1b; color: #fff;
     font-size: 13.5px; padding: 10px 16px; border-radius: 10px; opacity: 0;
     transition: opacity .15s; z-index: 70; pointer-events: none;
-    white-space: nowrap; }
+    max-width: 92vw; text-align: center; }
   .lgv2 .lg-toast.on { opacity: 1; }
   @media (max-width: 768px) {
     .lgv2 .lg-card { display: none !important; }
     .lgv2 .lg-demo-toggle { margin-left: 0; }
+    .lgv2 #lgMap { max-height: 72vh; }
   }
+  @media (min-width: 769px) { .lgv2 .lg-hud { display: none !important; } }
 </style>
 
 <script>
@@ -171,12 +218,15 @@ export function getStaticPaths() {
 
   const $ = (id) => document.getElementById(id);
   const isMobile = () => matchMedia('(max-width: 768px)').matches;
+  const SVGNS = 'http://www.w3.org/2000/svg';
 
-  // ── 데이터 로드 & 칠하기 ─────────────────────────────────────────────
+  // ── 데이터 로드 & 칠하기 & 라벨 ─────────────────────────────────────
   const COLLECT_FILL = '#e4e3da';
   fetch(`${base}/league/demo.json`).then((r) => r.json()).then((d) => {
     DATA = d;
     paint();
+    buildLabels();
+    updateLabels();
   });
 
   function paint() {
@@ -188,11 +238,63 @@ export function getStaticPaths() {
     }
   }
 
+  function chIcon(code, cls = 'lg-flag') {
+    const ch = DATA.channels[code];
+    const sq = ch.i.endsWith('.svg') ? ' lg-flag--sq' : '';
+    return `<img class="${cls}${sq}" src="${base}/league/ch/${ch.i}" alt="">`;
+  }
+
+  // 지명 라벨 2층: 광역(축소 화면) · 시군구(그 지역이 화면에서 충분히 클 때)
+  let lblSido, lblSgg;
+  function buildLabels() {
+    lblSido = document.createElementNS(SVGNS, 'g');
+    lblSgg = document.createElementNS(SVGNS, 'g');
+    for (const s of DATA.sido) {
+      const t = document.createElementNS(SVGNS, 'text');
+      t.textContent = s.n;
+      t.setAttribute('x', s.c[0]);
+      t.setAttribute('y', s.c[1]);
+      lblSido.appendChild(t);
+    }
+    for (const [g, r] of Object.entries(DATA.regions)) {
+      const t = document.createElementNS(SVGNS, 'text');
+      t.textContent = r.s;
+      t.setAttribute('x', r.c[0]);
+      t.setAttribute('y', r.c[1]);
+      t.dataset.w = r.b[2];
+      lblSgg.appendChild(t);
+    }
+    svg.appendChild(lblSido);
+    svg.appendChild(lblSgg);
+  }
+
+  let lastLblW = 0;
+  function updateLabels() {
+    if (!lblSido) return;
+    if (Math.abs(vb.w - lastLblW) < 0.5) return;   // 팬은 라벨 변화 없음
+    lastLblW = vb.w;
+    const rectW = svg.getBoundingClientRect().width || 1;
+    const scale = vb.w / rectW;                     // svg 단위 / 화면 px
+    const sidoOn = vb.w > VB.w / 2.2;
+    lblSido.style.display = sidoOn ? '' : 'none';
+    if (sidoOn) {
+      lblSido.style.fontSize = `${13.5 * scale}px`;
+      lblSido.style.strokeWidth = `${3 * scale}px`;
+    }
+    lblSgg.style.fontSize = `${11.5 * scale}px`;
+    lblSgg.style.strokeWidth = `${3 * scale}px`;
+    for (const t of lblSgg.children) {
+      // 그 지역의 화면 폭이 라벨을 감당할 때만 표시 → 확대할수록 자연스럽게 등장
+      t.style.display = (+t.dataset.w / scale) > 58 ? '' : 'none';
+    }
+  }
+
   // ── viewBox 줌·팬 ───────────────────────────────────────────────────
   // 최대 줌 = 24배 — 더 깊으면 400m 단순화의 각이 드러나고 주변 맥락도 사라진다
   const MINW = VB.w / 24;
   function applyVB() {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+    updateLabels();
   }
   function clampPan() {
     vb.x = Math.min(Math.max(vb.x, VB.x - vb.w * 0.25), VB.x + VB.w - vb.w * 0.75);
@@ -305,7 +407,7 @@ export function getStaticPaths() {
     zoomAt(vb.x + vb.w / 2, vb.y + vb.h / 2, 1 / 1.5));
   $('lgZfit').addEventListener('click', () => animateTo({ ...VB }));
 
-  // ── 툴팁(호버 = 지역명만) · 선택 ────────────────────────────────────
+  // ── 툴팁(호버 = 지역명만) ───────────────────────────────────────────
   const tip = $('lgTip');
   svg.addEventListener('pointermove', (e) => {
     if (e.pointerType === 'touch' || ptrs.size > 0) { tip.hidden = true; return; }
@@ -319,6 +421,18 @@ export function getStaticPaths() {
   });
   svg.addEventListener('pointerleave', () => { tip.hidden = true; });
 
+  // ── 카드 내용 (PC 플로팅 / 모바일 HUD 공용 빌더) ─────────────────────
+  function rowsHTML(g, hud) {
+    const r = DATA.regions[g];
+    const rowCls = hud ? 'lg-hrow' : 'lg-row';
+    return r.t.map(([c, s], i) => `
+      <div class="${rowCls}">
+        <span class="lg-rank${i === 0 ? ' lg-rank--top' : ''}">${i + 1}위</span>
+        ${chIcon(c)}
+        <span class="nm">${DATA.channels[c].n}</span>
+        <span class="sc">${s}</span>
+      </div>`).join('');
+  }
   function cardHTML(g) {
     const r = DATA.regions[g];
     if (collecting) {
@@ -329,30 +443,38 @@ export function getStaticPaths() {
         순위는 표본이 충분히 쌓이면 열려요.</div>
         <a class="lg-cta" href="#" data-demo>앱에서 진행 상황 보기</a>`;
     }
-    const rows = r.t.map(([c, s], i) => `
-      <div class="lg-row">
-        <span class="lg-rank">${i + 1}위</span>
-        <span class="lg-dot" style="background:${DATA.channels[c].c}"></span>
-        <span class="nm">${DATA.channels[c].n}</span>
-        <span class="sc">${s}</span>
-      </div>`).join('');
     return `<button class="lg-x" aria-label="닫기">✕</button>
       <div class="lg-cardhead"><b>${r.n}</b><span>최근 30일 · 종합</span></div>
-      <div class="lg-schead">웨더리그 점수</div>${rows}
+      <div class="lg-schead">웨더리그 점수</div>${rowsHTML(g, false)}
       <a class="lg-cta" href="#" data-demo>전체 13채널 순위 보기 — 앱에서</a>`;
+  }
+  function hudHTML(g) {
+    const r = DATA.regions[g];
+    if (collecting) {
+      return `<button class="lg-x" aria-label="닫기">✕</button>
+        <div class="lg-hudhead"><b>${r.n}</b></div>
+        <div class="lg-collect"><b>아직 공식 순위를 모으고 있어요</b>
+        8월 11일부터 새 기준으로 측정 중이에요.</div>
+        <a class="lg-hudcta" href="#" data-demo>앱에서 진행 상황 보기 →</a>`;
+    }
+    return `<button class="lg-x" aria-label="닫기">✕</button>
+      <div class="lg-hudhead"><b>${r.n}</b><span>최근 30일 · 종합 — 웨더리그 점수</span></div>
+      ${rowsHTML(g, true)}
+      <a class="lg-hudcta" href="#" data-demo>전체 13채널 순위 보기 — 앱에서 →</a>`;
   }
 
   const card = $('lgCard');
-  const sheet = $('lgSheet');
+  const hud = $('lgHud');
   function select(g, at) {
     selected = g;
     svg.querySelectorAll('path.sel').forEach((p) => p.classList.remove('sel'));
     const el = svg.querySelector(`path[data-g="${g}"]`);
+    // 선택 지역을 path 층 맨 뒤로 (라벨 층은 svg 직속이라 여전히 위)
     if (el) { el.classList.add('sel'); el.parentNode.appendChild(el); }
     if (isMobile()) {
-      $('lgSheetBody').innerHTML = cardHTML(g);
-      sheet.hidden = false;
-      requestAnimationFrame(() => sheet.classList.add('open'));
+      // 모바일: 얇은 HUD — 탭마다 내용만 교체 (지도를 계속 크게 유지)
+      hud.innerHTML = hudHTML(g);
+      hud.hidden = false;
     } else {
       card.innerHTML = cardHTML(g);
       card.hidden = false;
@@ -378,8 +500,7 @@ export function getStaticPaths() {
     selected = null;
     svg.querySelectorAll('path.sel').forEach((p) => p.classList.remove('sel'));
     card.hidden = true;
-    sheet.classList.remove('open');
-    setTimeout(() => { if (!sheet.classList.contains('open')) sheet.hidden = true; }, 250);
+    hud.hidden = true;
   }
   document.addEventListener('click', (e) => {
     const t = e.target;
@@ -461,18 +582,26 @@ export function getStaticPaths() {
       }
       navigator.geolocation.getCurrentPosition((pos) => {
         btn.disabled = false;
-        const g = judgeRegion(pos.coords.longitude, pos.coords.latitude);
-        if (g) {
-          toast(`내 위치: ${DATA.regions[g].n}`);
+        const lon = pos.coords.longitude, lat = pos.coords.latitude;
+        const acc = pos.coords.accuracy || 0;
+        // 디버그는 로컬 콘솔로만 — 좌표는 이 함수 밖으로 내보내지 않는다
+        console.log('[내위치]', lon.toFixed(5), lat.toFixed(5), `±${Math.round(acc)}m`);
+        const accTxt = acc >= 1000 ? `±${(acc / 1000).toFixed(1)}km` : `±${Math.round(acc)}m`;
+        const g = judgeRegion(lon, lat);
+        if (!g) {
+          toast(`서비스 지역(대한민국 시·군·구) 밖이에요 · 정확도 ${accTxt}`);
+        } else if (acc > 1200) {
+          // 대략적 위치(네트워크 측위 등)면 자동 선택하지 않는다 — 오판 경험 방지
+          toast(`위치 정확도가 낮아요(${accTxt}) — 지역 검색을 이용해 주세요`);
+        } else {
+          toast(`내 위치: ${DATA.regions[g].n} · 정확도 ${accTxt}`);
           zoomToRegion(g);
           setTimeout(() => select(g), 260);
-        } else {
-          toast('서비스 지역(대한민국 시·군·구) 밖이에요');
         }
       }, () => {
         btn.disabled = false;
         toast('위치 권한이 거절됐어요 — 검색으로 찾아보세요');
-      }, { enableHighAccuracy: true, timeout: 8000 });
+      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     } catch {
       btn.disabled = false;
       toast('경계 자료를 불러오지 못했어요');
@@ -486,6 +615,6 @@ export function getStaticPaths() {
     t.textContent = msg;
     t.classList.add('on');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('on'), 3200);
+    toastTimer = setTimeout(() => t.classList.remove('on'), 3600);
   }
 </script>
