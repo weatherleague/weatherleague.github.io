@@ -97,8 +97,10 @@ export function getStaticPaths() {
     border: 1px solid #e5e4db; border-radius: 14px; overflow: hidden; }
   .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none;
     max-height: 78vh; }
-  .lgv2 #lgMap path { stroke: #fff; stroke-width: .6; cursor: pointer; }
-  .lgv2 #lgMap path.sel { stroke: #1d1d1b; stroke-width: 1.6; }
+  /* vector-effect: 줌 배율과 무관하게 경계선을 화면 픽셀 굵기로 유지 */
+  .lgv2 #lgMap path { stroke: #fff; stroke-width: .8; cursor: pointer;
+    vector-effect: non-scaling-stroke; }
+  .lgv2 #lgMap path.sel { stroke: #1d1d1b; stroke-width: 1.8; }
   .lgv2 .lg-zoom { position: absolute; right: 12px; top: 12px; display: flex;
     flex-direction: column; gap: 6px; }
   .lgv2 .lg-sq { width: 40px; height: 40px; padding: 0; font-size: 18px;
@@ -187,7 +189,8 @@ export function getStaticPaths() {
   }
 
   // ── viewBox 줌·팬 ───────────────────────────────────────────────────
-  const MINW = VB.w / 40;
+  // 최대 줌 = 24배 — 더 깊으면 400m 단순화의 각이 드러나고 주변 맥락도 사라진다
+  const MINW = VB.w / 24;
   function applyVB() {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   }
@@ -226,7 +229,7 @@ export function getStaticPaths() {
   }
   function zoomToRegion(g) {
     const b = DATA.regions[g].b;
-    const w = Math.min(Math.max(Math.max(b[2] * 3, (b[3] * 3 * VB.w) / VB.h), MINW), VB.w);
+    const w = Math.min(Math.max(Math.max(b[2] * 4.5, (b[3] * 4.5 * VB.w) / VB.h), MINW), VB.w);
     const h = VB.h * (w / VB.w);
     animateTo({ x: b[0] + b[2] / 2 - w / 2, y: b[1] + b[3] / 2 - h / 2, w, h });
   }
