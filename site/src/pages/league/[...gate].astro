@@ -59,6 +59,7 @@ export function getStaticPaths() {
 
       <div class="lg-mapwrap" id="lgWrap">
         <LeagueMapSvg />
+        <div id="lgLbls" class="lg-lbls" aria-hidden="true"></div>
         <div class="lg-zoom">
           <button id="lgZin" class="lg-btn lg-sq" type="button" aria-label="확대">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
@@ -128,9 +129,15 @@ export function getStaticPaths() {
   .lgv2 #lgMap path { stroke: #fff; stroke-width: .8; cursor: pointer;
     vector-effect: non-scaling-stroke; }
   .lgv2 #lgMap path.sel { stroke: #1d1d1b; stroke-width: 1.8; }
-  .lgv2 #lgMap text { pointer-events: none; font-family: inherit;
-    font-weight: 600; fill: #43423c; paint-order: stroke;
-    stroke: rgba(255,255,255,.86); text-anchor: middle; }
+  /* 지명 라벨 — SVG 밖 HTML 오버레이 (SVG 텍스트는 확대 시 폰 GPU가 글자를
+     뭉갠다, 2026-08-12 실기기 피드백). 위치는 JS가 매 프레임 화면 좌표로 환산 */
+  .lgv2 .lg-lbls { position: absolute; inset: 0; pointer-events: none;
+    z-index: 5; overflow: hidden; }
+  .lgv2 .lg-lbl { position: absolute; left: 0; top: 0; white-space: nowrap;
+    font-size: 11px; font-weight: 600; color: #46453f; letter-spacing: -0.02em;
+    text-shadow: 0 1px 2px #fff, 0 -1px 2px #fff, 1px 0 2px #fff, -1px 0 2px #fff;
+    will-change: transform; }
+  .lgv2 .lg-lbl--sido { font-size: 13.5px; font-weight: 700; color: #33322e; }
   .lgv2 .lg-zoom { position: absolute; right: 12px; top: 12px; display: flex;
     flex-direction: column; gap: 6px; }
   .lgv2 .lg-sq { width: 40px; height: 40px; padding: 0; justify-content: center;
@@ -218,7 +225,7 @@ export function getStaticPaths() {
 
   const $ = (id) => document.getElementById(id);
   const isMobile = () => matchMedia('(max-width: 768px)').matches;
-  const SVGNS = 'http://www.w3.org/2000/svg';
+  addEventListener('resize', () => scheduleLabels());
 
   // ── 데이터 로드 & 칠하기 & 라벨 ─────────────────────────────────────
   const COLLECT_FILL = '#e4e3da';
@@ -245,51 +252,64 @@ export function getStaticPaths() {
   }
 
   // 지명 라벨 2층: 광역(축소 화면) · 시군구(그 지역이 화면에서 충분히 클 때)
-  let lblSido, lblSgg;
+  // HTML 오버레이 방식 — 글자는 항상 화면 픽셀로 그려져 어떤 배율에서도 또렷하다
+  const lbls = $('lgLbls');
+  let sidoEls = [], sggEls = [];
   function buildLabels() {
-    lblSido = document.createElementNS(SVGNS, 'g');
-    lblSgg = document.createElementNS(SVGNS, 'g');
     for (const s of DATA.sido) {
-      const t = document.createElementNS(SVGNS, 'text');
-      t.textContent = s.n;
-      t.setAttribute('x', s.c[0]);
-      t.setAttribute('y', s.c[1]);
-      lblSido.appendChild(t);
+      const el = document.createElement('span');
+      el.className = 'lg-lbl lg-lbl--sido';
+      el.textContent = s.n;
+      el.dataset.x = s.c[0];
+      el.dataset.y = s.c[1];
+      lbls.appendChild(el);
+      sidoEls.push(el);
     }
-    for (const [g, r] of Object.entries(DATA.regions)) {
-      const t = document.createElementNS(SVGNS, 'text');
-      t.textContent = r.s;
-      t.setAttribute('x', r.c[0]);
-      t.setAttribute('y', r.c[1]);
-      t.dataset.w = r.b[2];
-      lblSgg.appendChild(t);
+    for (const r of Object.values(DATA.regions)) {
+      const el = document.createElement('span');
+      el.className = 'lg-lbl';
+      el.textContent = r.s;
+      el.dataset.x = r.c[0];
+      el.dataset.y = r.c[1];
+      el.dataset.w = r.b[2];
+      lbls.appendChild(el);
+      sggEls.push(el);
     }
-    svg.appendChild(lblSido);
-    svg.appendChild(lblSgg);
   }
 
-  let lastLblW = 0;
+  function placeLabel(el, rc, offX, offY) {
+    const sx = ((+el.dataset.x - vb.x) / vb.w) * rc.width + offX;
+    const sy = ((+el.dataset.y - vb.y) / vb.h) * rc.height + offY;
+    if (sx < -50 || sx > rc.width + 50 || sy < -20 || sy > rc.height + 20) {
+      el.style.display = 'none';
+      return;
+    }
+    el.style.display = '';
+    el.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) translate(-50%,-50%)`;
+  }
   function updateLabels() {
-    if (!lblSido) return;
-    if (Math.abs(vb.w - lastLblW) < 0.5) return;   // 팬은 라벨 변화 없음
-    lastLblW = vb.w;
-    const rectW = svg.getBoundingClientRect().width || 1;
-    const scale = vb.w / rectW;                     // svg 단위 / 화면 px
+    if (!sidoEls.length) return;
+    const rc = svg.getBoundingClientRect();
+    const wrc = wrap.getBoundingClientRect();
+    const offX = rc.left - wrc.left, offY = rc.top - wrc.top;
+    const scale = vb.w / (rc.width || 1);           // svg 단위 / 화면 px
     const sidoOn = vb.w > VB.w / 2.2;
-    lblSido.style.display = sidoOn ? '' : 'none';
-    if (sidoOn) {
-      lblSido.style.fontSize = `${14.5 * scale}px`;
-      lblSido.style.strokeWidth = `${3.2 * scale}px`;
-      lblSido.style.fontWeight = '700';
+    for (const el of sidoEls) {
+      if (!sidoOn) { el.style.display = 'none'; continue; }
+      placeLabel(el, rc, offX, offY);
     }
-    lblSgg.style.fontSize = `${11.5 * scale}px`;
-    lblSgg.style.strokeWidth = `${3 * scale}px`;
-    for (const t of lblSgg.children) {
+    for (const el of sggEls) {
       // 전국 축척(광역 라벨이 떠 있는 동안)에는 숨기고, 확대해서 그 지역이
-      // 화면에서 충분히 커졌을 때만 등장 (v3 실측: 문턱 58px는 전국 화면에서
-      // 큰 군들이 전부 통과해 지도가 글자로 덮였다)
-      t.style.display = !sidoOn && (+t.dataset.w / scale) > 110 ? '' : 'none';
+      // 화면에서 충분히 커졌을 때만 등장 (문턱 58px는 전국 화면이 글자로 덮였다)
+      if (sidoOn || (+el.dataset.w / scale) <= 110) { el.style.display = 'none'; continue; }
+      placeLabel(el, rc, offX, offY);
     }
+  }
+  let lblRaf = false;
+  function scheduleLabels() {
+    if (lblRaf) return;
+    lblRaf = true;
+    requestAnimationFrame(() => { lblRaf = false; updateLabels(); });
   }
 
   // ── viewBox 줌·팬 ───────────────────────────────────────────────────
@@ -297,7 +317,7 @@ export function getStaticPaths() {
   const MINW = VB.w / 24;
   function applyVB() {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
-    updateLabels();
+    scheduleLabels();   // 팬·줌 모두 라벨 위치가 바뀐다 (rAF로 프레임당 1회)
   }
   function clampPan() {
     vb.x = Math.min(Math.max(vb.x, VB.x - vb.w * 0.25), VB.x + VB.w - vb.w * 0.75);
