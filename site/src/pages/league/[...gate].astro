@@ -166,7 +166,6 @@ export function getStaticPaths() {
   let judge = null;         // 판정용 경계 (내 위치 첫 사용 때만 로드)
   let collecting = false;   // 상태 데모: 수집 중
   let selected = null;
-  let suppressClick = false;
 
   const $ = (id) => document.getElementById(id);
   const isMobile = () => matchMedia('(max-width: 768px)').matches;
@@ -239,15 +238,20 @@ export function getStaticPaths() {
   }, { passive: false });
 
   // 포인터: 1개 = 팬 / 2개 = 핀치 (증분 방식)
+  // ⚠ setPointerCapture는 click 이벤트의 target을 svg로 바꿔 지역 클릭을 죽인다
+  //   (2026-08-11 실측) — 그래서 선택은 click이 아니라 pointerup에서 판정한다.
   const ptrs = new Map();
-  let panFrom = null, pinchD = 0, movedPx = 0;
+  let panFrom = null, pinchD = 0, movedPx = 0, downG = null, downAt = null;
   svg.addEventListener('pointerdown', (e) => {
     svg.setPointerCapture(e.pointerId);
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     movedPx = 0;
     if (ptrs.size === 1) {
+      downG = e.target?.dataset?.g || null;
+      downAt = { x: e.clientX, y: e.clientY };
       panFrom = { cx: e.clientX, cy: e.clientY, vb: { ...vb } };
     } else if (ptrs.size === 2) {
+      downG = null;
       panFrom = null;
       const [a, b] = [...ptrs.values()];
       pinchD = Math.hypot(a.x - b.x, a.y - b.y);
@@ -282,7 +286,11 @@ export function getStaticPaths() {
     if (ptrs.size < 2) pinchD = 0;
     if (ptrs.size === 0) {
       panFrom = null;
-      suppressClick = movedPx > 6;
+      if (e.type === 'pointerup' && movedPx <= 6) {
+        if (downG) select(downG, downAt);
+        else deselect();
+      }
+      downG = null;
     }
   }
   svg.addEventListener('pointerup', ptrEnd);
@@ -307,13 +315,6 @@ export function getStaticPaths() {
     tip.hidden = false;
   });
   svg.addEventListener('pointerleave', () => { tip.hidden = true; });
-
-  svg.addEventListener('click', (e) => {
-    if (suppressClick) { suppressClick = false; return; }
-    const g = e.target?.dataset?.g;
-    if (g) select(g, { x: e.clientX, y: e.clientY });
-    else deselect();
-  });
 
   function cardHTML(g) {
     const r = DATA.regions[g];
