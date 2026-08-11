@@ -1,0 +1,487 @@
+---
+// 리그 현황 탭 — 시제품 v2 (2026-08-11, 미리보기 전용)
+//
+// ⚠ 이 페이지는 **미리보기 빌드에서만 생성된다** (아래 getStaticPaths 게이트).
+//   본 사이트 공개 게이트 = "v4 종합순위 공개 가능 상태" (BACKLOG 웹 트랙 ③).
+//   데이터는 전부 데모(고정 시드 더미) — 실제 순위를 싣지 않는다.
+// 자산 생성기: 비공개 저장소 pipeline/build_league_map_assets.py
+import Base from '../../layouts/Base.astro';
+import LeagueMapSvg from '../../components/LeagueMapSvg.astro';
+
+export function getStaticPaths() {
+  // 갈리는 지점은 base=/preview 하나 (미리보기 사이트와 같은 판단 기준 — 불변 13)
+  return import.meta.env.BASE_URL.replace(/\/$/, '') === '/preview'
+    ? [{ params: { gate: undefined } }]
+    : [];
+}
+---
+
+<Base
+  title="리그 현황 (개발 중) — 웨더리그"
+  description="우리 동네 1위 날씨 채널 — 시군구 지도에서 확인하세요."
+  path="/league/"
+>
+  <main class="lgv2">
+    <div class="container">
+      <h1>우리 동네 1위 날씨 채널</h1>
+      <p class="lg-note">
+        시제품 v2 — <b>화면의 순위·점수는 전부 데모(무작위)입니다.</b>
+        지도를 확대하고, 지역을 눌러 보세요.
+      </p>
+
+      <div class="lg-toolbar">
+        <div class="lg-search">
+          <input id="lgQ" type="search" placeholder="시·군·구 검색 (예: 마포)"
+                 autocomplete="off" aria-label="시군구 검색" />
+          <div id="lgQList" class="lg-qlist" hidden></div>
+        </div>
+        <button id="lgLoc" class="lg-btn" type="button">📍 내 위치</button>
+        <div class="lg-demo-toggle" role="group" aria-label="상태 데모">
+          <button id="lgModeOpen" class="lg-chip on" type="button">공개 후</button>
+          <button id="lgModeCol" class="lg-chip" type="button">수집 중</button>
+        </div>
+      </div>
+
+      <div class="lg-mapwrap" id="lgWrap">
+        <LeagueMapSvg />
+        <div class="lg-zoom">
+          <button id="lgZin" class="lg-btn lg-sq" type="button" aria-label="확대">＋</button>
+          <button id="lgZout" class="lg-btn lg-sq" type="button" aria-label="축소">－</button>
+          <button id="lgZfit" class="lg-btn lg-sq" type="button" aria-label="전국 보기">⤢</button>
+        </div>
+        <div id="lgTip" class="lg-tip" hidden></div>
+        <div id="lgCard" class="lg-card" hidden></div>
+      </div>
+      <p class="lg-caption">각 지역은 현재 1위 채널의 색으로 표시됩니다 ·
+        내 위치는 브라우저 안에서만 판정하며 좌표를 서버로 보내지 않아요.</p>
+    </div>
+
+    <div id="lgSheet" class="lg-sheet" hidden>
+      <div class="lg-sheet-grip" aria-hidden="true"></div>
+      <div id="lgSheetBody"></div>
+    </div>
+    <div id="lgToast" class="lg-toast" role="status"></div>
+  </main>
+</Base>
+
+<style is:global>
+  .lgv2 { padding: 26px 0 70px; }
+  .lgv2 h1 { font-size: 24px; letter-spacing: -0.03em; }
+  .lgv2 .lg-note { color: #6d6c64; font-size: 14px; margin: 6px 0 16px; }
+  .lgv2 .lg-toolbar { display: flex; gap: 10px; align-items: center;
+    flex-wrap: wrap; margin-bottom: 12px; }
+  .lgv2 .lg-search { position: relative; flex: 1 1 220px; max-width: 340px; }
+  .lgv2 .lg-search input { width: 100%; padding: 10px 14px; font-size: 15px;
+    border: 1px solid #d9d8cf; border-radius: 10px; background: #fff;
+    font-family: inherit; }
+  .lgv2 .lg-qlist { position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: #fff; border: 1px solid #d9d8cf; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.09); z-index: 30; overflow: hidden; }
+  .lgv2 .lg-qlist button { display: block; width: 100%; text-align: left;
+    padding: 10px 14px; border: 0; background: none; font: inherit;
+    font-size: 14px; cursor: pointer; }
+  .lgv2 .lg-qlist button:hover { background: #f4f3ec; }
+  .lgv2 .lg-btn { padding: 10px 14px; font-size: 14px; font-family: inherit;
+    border: 1px solid #d9d8cf; border-radius: 10px; background: #fff;
+    cursor: pointer; }
+  .lgv2 .lg-btn:hover { background: #f4f3ec; }
+  .lgv2 .lg-btn[disabled] { opacity: .5; cursor: wait; }
+  .lgv2 .lg-demo-toggle { margin-left: auto; display: flex; gap: 4px;
+    background: #ecebe2; border-radius: 10px; padding: 3px; }
+  .lgv2 .lg-chip { border: 0; background: none; padding: 7px 12px;
+    border-radius: 8px; font: inherit; font-size: 13px; color: #6d6c64;
+    cursor: pointer; }
+  .lgv2 .lg-chip.on { background: #fff; color: #1d1d1b;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .lgv2 .lg-mapwrap { position: relative; background: #fff;
+    border: 1px solid #e5e4db; border-radius: 14px; overflow: hidden; }
+  .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none;
+    max-height: 78vh; }
+  .lgv2 #lgMap path { stroke: #fff; stroke-width: .6; cursor: pointer; }
+  .lgv2 #lgMap path.sel { stroke: #1d1d1b; stroke-width: 1.6; }
+  .lgv2 .lg-zoom { position: absolute; right: 12px; top: 12px; display: flex;
+    flex-direction: column; gap: 6px; }
+  .lgv2 .lg-sq { width: 40px; height: 40px; padding: 0; font-size: 18px;
+    line-height: 1; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .lgv2 .lg-tip { position: absolute; pointer-events: none; background: #1d1d1b;
+    color: #fff; font-size: 12.5px; padding: 5px 9px; border-radius: 7px;
+    z-index: 20; white-space: nowrap; }
+  .lgv2 .lg-card { position: absolute; z-index: 25; width: 252px; background: #fff;
+    border: 1px solid #e0dfd6; border-radius: 13px; padding: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.14); }
+  .lgv2 .lg-cardhead { display: flex; align-items: baseline; gap: 8px;
+    margin-bottom: 10px; padding-right: 20px; }
+  .lgv2 .lg-cardhead b { font-size: 15px; letter-spacing: -0.02em; }
+  .lgv2 .lg-cardhead span { font-size: 11.5px; color: #8a897f; flex: none; }
+  .lgv2 .lg-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px;
+    border: 0; background: none; font-size: 14px; color: #8a897f; cursor: pointer; }
+  .lgv2 .lg-row { display: flex; align-items: center; gap: 8px; padding: 7px 0;
+    font-size: 14px; }
+  .lgv2 .lg-row + .lg-row { border-top: 1px solid #f0efe8; }
+  .lgv2 .lg-rank { flex: none; width: 30px; height: 21px; border-radius: 6px;
+    font-size: 11.5px; font-weight: 700; display: inline-flex;
+    align-items: center; justify-content: center; background: #ecebe2;
+    color: #6d6c64; }
+  .lgv2 .lg-row:first-of-type .lg-rank { background: #1c2b4a; color: #fff; }
+  .lgv2 .lg-dot { flex: none; width: 12px; height: 12px; border-radius: 4px; }
+  .lgv2 .lg-row .nm { flex: 1; letter-spacing: -0.02em; }
+  .lgv2 .lg-row .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lgv2 .lg-schead { font-size: 11px; color: #8a897f; text-align: right;
+    margin-bottom: 2px; }
+  .lgv2 .lg-cta { display: block; text-align: center; margin-top: 11px;
+    padding: 11px; background: #1c2b4a; color: #fff; border-radius: 10px;
+    text-decoration: none; font-size: 13.5px; }
+  .lgv2 .lg-collect { background: #f7f6f1; border-radius: 10px; padding: 14px;
+    font-size: 13.5px; color: #45443f; line-height: 1.55; }
+  .lgv2 .lg-collect b { display: block; margin-bottom: 3px; }
+  .lgv2 .lg-caption { font-size: 12.5px; color: #8a897f; margin-top: 10px; }
+  .lgv2 .lg-sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    background: #fff; border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 30px rgba(0,0,0,.18); padding: 8px 18px
+    calc(18px + env(safe-area-inset-bottom)); transform: translateY(105%);
+    transition: transform .22s ease; }
+  .lgv2 .lg-sheet.open { transform: none; }
+  .lgv2 .lg-sheet-grip { width: 38px; height: 4px; border-radius: 2px;
+    background: #d9d8cf; margin: 4px auto 10px; }
+  .lgv2 .lg-toast { position: fixed; left: 50%; bottom: 26px;
+    transform: translateX(-50%); background: #1d1d1b; color: #fff;
+    font-size: 13.5px; padding: 10px 16px; border-radius: 10px; opacity: 0;
+    transition: opacity .15s; z-index: 70; pointer-events: none;
+    white-space: nowrap; }
+  .lgv2 .lg-toast.on { opacity: 1; }
+  @media (max-width: 768px) {
+    .lgv2 .lg-card { display: none !important; }
+    .lgv2 .lg-demo-toggle { margin-left: 0; }
+  }
+</style>
+
+<script>
+  // ── 상태 ────────────────────────────────────────────────────────────
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const svg = document.getElementById('lgMap');
+  const wrap = document.getElementById('lgWrap');
+  const VB = { x: 0, y: 0, w: 760, h: 821 };
+  let vb = { ...VB };
+  let DATA = null;          // demo.json
+  let judge = null;         // 판정용 경계 (내 위치 첫 사용 때만 로드)
+  let collecting = false;   // 상태 데모: 수집 중
+  let selected = null;
+  let suppressClick = false;
+
+  const $ = (id) => document.getElementById(id);
+  const isMobile = () => matchMedia('(max-width: 768px)').matches;
+
+  // ── 데이터 로드 & 칠하기 ─────────────────────────────────────────────
+  const COLLECT_FILL = '#e4e3da';
+  fetch(`${base}/league/demo.json`).then((r) => r.json()).then((d) => {
+    DATA = d;
+    paint();
+  });
+
+  function paint() {
+    if (!DATA) return;
+    for (const p of svg.querySelectorAll('path')) {
+      const r = DATA.regions[p.dataset.g];
+      p.style.fill = collecting || !r ? COLLECT_FILL
+        : DATA.channels[r.t[0][0]].c;
+    }
+  }
+
+  // ── viewBox 줌·팬 ───────────────────────────────────────────────────
+  const MINW = VB.w / 40;
+  function applyVB() {
+    svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  }
+  function clampPan() {
+    vb.x = Math.min(Math.max(vb.x, VB.x - vb.w * 0.25), VB.x + VB.w - vb.w * 0.75);
+    vb.y = Math.min(Math.max(vb.y, VB.y - vb.h * 0.25), VB.y + VB.h - vb.h * 0.75);
+  }
+  function svgPt(clientX, clientY) {
+    const rc = svg.getBoundingClientRect();
+    return { x: vb.x + ((clientX - rc.left) / rc.width) * vb.w,
+             y: vb.y + ((clientY - rc.top) / rc.height) * vb.h };
+  }
+  function zoomAt(px, py, f) {
+    const w = Math.min(Math.max(vb.w / f, MINW), VB.w);
+    const real = vb.w / w;
+    vb.x = px - (px - vb.x) / real;
+    vb.y = py - (py - vb.y) / real;
+    vb.w = w;
+    vb.h = VB.h * (w / VB.w);
+    clampPan();
+    applyVB();
+  }
+  function animateTo(target, ms = 240) {
+    const from = { ...vb };
+    const t0 = performance.now();
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / ms);
+      const e = 1 - (1 - k) * (1 - k);
+      vb = { x: from.x + (target.x - from.x) * e,
+             y: from.y + (target.y - from.y) * e,
+             w: from.w + (target.w - from.w) * e,
+             h: from.h + (target.h - from.h) * e };
+      applyVB();
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+  function zoomToRegion(g) {
+    const b = DATA.regions[g].b;
+    const w = Math.min(Math.max(Math.max(b[2] * 3, (b[3] * 3 * VB.w) / VB.h), MINW), VB.w);
+    const h = VB.h * (w / VB.w);
+    animateTo({ x: b[0] + b[2] / 2 - w / 2, y: b[1] + b[3] / 2 - h / 2, w, h });
+  }
+
+  svg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const p = svgPt(e.clientX, e.clientY);
+    zoomAt(p.x, p.y, e.deltaY < 0 ? 1.3 : 1 / 1.3);
+  }, { passive: false });
+
+  // 포인터: 1개 = 팬 / 2개 = 핀치 (증분 방식)
+  const ptrs = new Map();
+  let panFrom = null, pinchD = 0, movedPx = 0;
+  svg.addEventListener('pointerdown', (e) => {
+    svg.setPointerCapture(e.pointerId);
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    movedPx = 0;
+    if (ptrs.size === 1) {
+      panFrom = { cx: e.clientX, cy: e.clientY, vb: { ...vb } };
+    } else if (ptrs.size === 2) {
+      panFrom = null;
+      const [a, b] = [...ptrs.values()];
+      pinchD = Math.hypot(a.x - b.x, a.y - b.y);
+    }
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinchD > 0 && d > 0) {
+        const mid = svgPt((a.x + b.x) / 2, (a.y + b.y) / 2);
+        zoomAt(mid.x, mid.y, d / pinchD);
+      }
+      pinchD = d;
+      movedPx = 99;
+    } else if (panFrom) {
+      const rc = svg.getBoundingClientRect();
+      const dx = ((e.clientX - panFrom.cx) / rc.width) * panFrom.vb.w;
+      const dy = ((e.clientY - panFrom.cy) / rc.height) * panFrom.vb.h;
+      movedPx = Math.max(movedPx,
+        Math.abs(e.clientX - panFrom.cx) + Math.abs(e.clientY - panFrom.cy));
+      vb.x = panFrom.vb.x - dx;
+      vb.y = panFrom.vb.y - dy;
+      clampPan();
+      applyVB();
+    }
+  });
+  function ptrEnd(e) {
+    ptrs.delete(e.pointerId);
+    if (ptrs.size < 2) pinchD = 0;
+    if (ptrs.size === 0) {
+      panFrom = null;
+      suppressClick = movedPx > 6;
+    }
+  }
+  svg.addEventListener('pointerup', ptrEnd);
+  svg.addEventListener('pointercancel', ptrEnd);
+
+  $('lgZin').addEventListener('click', () =>
+    zoomAt(vb.x + vb.w / 2, vb.y + vb.h / 2, 1.5));
+  $('lgZout').addEventListener('click', () =>
+    zoomAt(vb.x + vb.w / 2, vb.y + vb.h / 2, 1 / 1.5));
+  $('lgZfit').addEventListener('click', () => animateTo({ ...VB }));
+
+  // ── 툴팁(호버 = 지역명만) · 선택 ────────────────────────────────────
+  const tip = $('lgTip');
+  svg.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'touch' || ptrs.size > 0) { tip.hidden = true; return; }
+    const g = e.target?.dataset?.g;
+    if (!g || !DATA) { tip.hidden = true; return; }
+    tip.textContent = DATA.regions[g].n;
+    const rc = wrap.getBoundingClientRect();
+    tip.style.left = `${Math.min(e.clientX - rc.left + 14, rc.width - 130)}px`;
+    tip.style.top = `${e.clientY - rc.top + 16}px`;
+    tip.hidden = false;
+  });
+  svg.addEventListener('pointerleave', () => { tip.hidden = true; });
+
+  svg.addEventListener('click', (e) => {
+    if (suppressClick) { suppressClick = false; return; }
+    const g = e.target?.dataset?.g;
+    if (g) select(g, { x: e.clientX, y: e.clientY });
+    else deselect();
+  });
+
+  function cardHTML(g) {
+    const r = DATA.regions[g];
+    if (collecting) {
+      return `<button class="lg-x" aria-label="닫기">✕</button>
+        <div class="lg-cardhead"><b>${r.n}</b></div>
+        <div class="lg-collect"><b>아직 공식 순위를 모으고 있어요</b>
+        8월 11일부터 새 기준으로 측정 중이에요.
+        순위는 표본이 충분히 쌓이면 열려요.</div>
+        <a class="lg-cta" href="#" data-demo>앱에서 진행 상황 보기</a>`;
+    }
+    const rows = r.t.map(([c, s], i) => `
+      <div class="lg-row">
+        <span class="lg-rank">${i + 1}위</span>
+        <span class="lg-dot" style="background:${DATA.channels[c].c}"></span>
+        <span class="nm">${DATA.channels[c].n}</span>
+        <span class="sc">${s}</span>
+      </div>`).join('');
+    return `<button class="lg-x" aria-label="닫기">✕</button>
+      <div class="lg-cardhead"><b>${r.n}</b><span>최근 30일 · 종합</span></div>
+      <div class="lg-schead">웨더리그 점수</div>${rows}
+      <a class="lg-cta" href="#" data-demo>전체 13채널 순위 보기 — 앱에서</a>`;
+  }
+
+  const card = $('lgCard');
+  const sheet = $('lgSheet');
+  function select(g, at) {
+    selected = g;
+    svg.querySelectorAll('path.sel').forEach((p) => p.classList.remove('sel'));
+    const el = svg.querySelector(`path[data-g="${g}"]`);
+    if (el) { el.classList.add('sel'); el.parentNode.appendChild(el); }
+    if (isMobile()) {
+      $('lgSheetBody').innerHTML = cardHTML(g);
+      sheet.hidden = false;
+      requestAnimationFrame(() => sheet.classList.add('open'));
+    } else {
+      card.innerHTML = cardHTML(g);
+      card.hidden = false;
+      const rc = wrap.getBoundingClientRect();
+      let ax, ay;
+      if (at) { ax = at.x - rc.left; ay = at.y - rc.top; }
+      else {
+        const b = DATA.regions[g].b;
+        const src = svg.getBoundingClientRect();
+        ax = ((b[0] + b[2] / 2 - vb.x) / vb.w) * src.width + src.left - rc.left;
+        ay = ((b[1] + b[3] / 2 - vb.y) / vb.h) * src.height + src.top - rc.top;
+      }
+      const cw = card.offsetWidth, ch = card.offsetHeight;
+      let x = ax + 16, y = ay - ch / 2;
+      if (x + cw > rc.width - 8) x = ax - cw - 16;   // 가장자리 자동 플립
+      x = Math.max(8, Math.min(x, rc.width - cw - 8));
+      y = Math.max(8, Math.min(y, rc.height - ch - 8));
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+    }
+  }
+  function deselect() {
+    selected = null;
+    svg.querySelectorAll('path.sel').forEach((p) => p.classList.remove('sel'));
+    card.hidden = true;
+    sheet.classList.remove('open');
+    setTimeout(() => { if (!sheet.classList.contains('open')) sheet.hidden = true; }, 250);
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    if (t.closest?.('.lg-x')) { deselect(); return; }
+    if (t.closest?.('[data-demo]')) {
+      e.preventDefault();
+      toast('데모 버튼이에요 — 실제 화면에서는 앱으로 이동해요');
+    }
+  });
+
+  // ── 상태 데모 토글 ──────────────────────────────────────────────────
+  function setMode(col) {
+    collecting = col;
+    $('lgModeOpen').classList.toggle('on', !col);
+    $('lgModeCol').classList.toggle('on', col);
+    paint();
+    if (selected) select(selected);
+  }
+  $('lgModeOpen').addEventListener('click', () => setMode(false));
+  $('lgModeCol').addEventListener('click', () => setMode(true));
+
+  // ── 지역 검색 ───────────────────────────────────────────────────────
+  const q = $('lgQ');
+  const qList = $('lgQList');
+  q.addEventListener('input', () => {
+    const v = q.value.trim().replace(/\s+/g, '');
+    if (!v || !DATA) { qList.hidden = true; return; }
+    const hits = Object.entries(DATA.regions)
+      .filter(([, r]) => r.n.replace(/\s+/g, '').includes(v))
+      .slice(0, 8);
+    qList.innerHTML = hits.map(([g, r]) =>
+      `<button type="button" data-g="${g}">${r.n}</button>`).join('');
+    qList.hidden = hits.length === 0;
+  });
+  qList.addEventListener('click', (e) => {
+    const g = e.target?.dataset?.g;
+    if (!g) return;
+    qList.hidden = true;
+    q.value = DATA.regions[g].n;
+    q.blur();
+    zoomToRegion(g);
+    setTimeout(() => select(g), 260);
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest?.('.lg-search')) qList.hidden = true;
+  });
+
+  // ── 내 위치 (좌표는 브라우저 안에서만 쓰고 즉시 폐기 — 서버 전송 없음) ──
+  function inRing(x, y, ring) {
+    let ins = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi)
+        ins = !ins;
+    }
+    return ins;
+  }
+  function judgeRegion(lon, lat) {
+    for (const [g, polys] of Object.entries(judge)) {
+      for (const rings of polys) {
+        let ins = false;
+        for (const ring of rings) if (inRing(lon, lat, ring)) ins = !ins;
+        if (ins) return g;
+      }
+    }
+    return null;
+  }
+  $('lgLoc').addEventListener('click', async () => {
+    if (!navigator.geolocation) {
+      toast('이 브라우저에서는 위치 기능을 쓸 수 없어요');
+      return;
+    }
+    const btn = $('lgLoc');
+    btn.disabled = true;
+    try {
+      if (!judge) {
+        toast('경계 자료를 불러오는 중이에요…');
+        judge = await (await fetch(`${base}/league/judge-boundaries.json`)).json();
+      }
+      navigator.geolocation.getCurrentPosition((pos) => {
+        btn.disabled = false;
+        const g = judgeRegion(pos.coords.longitude, pos.coords.latitude);
+        if (g) {
+          toast(`내 위치: ${DATA.regions[g].n}`);
+          zoomToRegion(g);
+          setTimeout(() => select(g), 260);
+        } else {
+          toast('서비스 지역(대한민국 시·군·구) 밖이에요');
+        }
+      }, () => {
+        btn.disabled = false;
+        toast('위치 권한이 거절됐어요 — 검색으로 찾아보세요');
+      }, { enableHighAccuracy: true, timeout: 8000 });
+    } catch {
+      btn.disabled = false;
+      toast('경계 자료를 불러오지 못했어요');
+    }
+  });
+
+  // ── 토스트 ──────────────────────────────────────────────────────────
+  let toastTimer;
+  function toast(msg) {
+    const t = $('lgToast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('on'), 3200);
+  }
+</script>
