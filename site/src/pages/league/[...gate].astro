@@ -229,7 +229,9 @@ export function getStaticPaths() {
 
   // ── 데이터 로드 & 칠하기 & 라벨 ─────────────────────────────────────
   const COLLECT_FILL = '#e4e3da';
-  fetch(`${base}/league/demo.json`).then((r) => r.json()).then((d) => {
+  // cache:'no-cache' = 항상 서버와 대조(변경 없으면 304) — 배포 직후 10분 캐시로
+  // 옛 데이터가 그려지는 문제 방지 (2026-08-12 실측)
+  fetch(`${base}/league/demo.json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => {
     DATA = d;
     paint();
     buildLabels();
@@ -601,7 +603,8 @@ export function getStaticPaths() {
     try {
       if (!judge) {
         toast('경계 자료를 불러오는 중이에요…');
-        judge = await (await fetch(`${base}/league/judge-boundaries.json`)).json();
+        judge = await (await fetch(`${base}/league/judge-boundaries.json`,
+          { cache: 'no-cache' })).json();
       }
       navigator.geolocation.getCurrentPosition((pos) => {
         btn.disabled = false;
