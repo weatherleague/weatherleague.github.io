@@ -83,6 +83,8 @@ export function getStaticPaths() {
         </button>
       </div>
 
+      <div class="lg-board">
+      <div class="lg-rail" id="lgRail" role="group" aria-label="채널 선택"></div>
       <div class="lg-mapwrap" id="lgWrap">
         <LeagueMapSvg />
         <div id="lgLbls" class="lg-lbls" aria-hidden="true"></div>
@@ -106,7 +108,9 @@ export function getStaticPaths() {
         <div id="lgCard" class="lg-card" hidden></div>
         <div id="lgHud" class="lg-hud" hidden></div>
       </div>
-      <p class="lg-caption">각 지역은 현재 1위 채널의 색으로 표시됩니다 ·
+      </div>
+      <p class="lg-caption"><span id="lgCapLead">채널을 고르면 그 채널이 1위인 지역이
+        떠올라요</span> · 지역을 누르면 1~3위를 볼 수 있어요 ·
         내 위치는 브라우저 안에서만 판정하며 좌표를 서버로 보내지 않아요.</p>
       </section>
     </div>
@@ -217,8 +221,34 @@ export function getStaticPaths() {
   .lgv2 .lg-btn--primary:hover { background: #26375e; }
   /* 배경 = 바다. 목적은 "바다는 파랗다"가 아니라 **육지를 돋보이게 하는 것** —
      탁한 청회색은 화면 전체를 눌렀다(2026-08-12 저녁 재조정). 거의 흰빛 하늘색으로. */
+  /* 채널 목록 + 지도 (넓은 화면 = 왼쪽 목록 / 좁은 화면 = 지도 위 가로 스크롤) */
+  .lgv2 .lg-board { display: flex; gap: 14px; align-items: flex-start; }
+  .lgv2 .lg-rail { flex: 0 0 202px; display: flex; flex-direction: column; gap: 4px;
+    background: #fff; border: 1px solid #e5e4db; border-radius: 14px; padding: 8px; }
+  .lgv2 .lg-rail button { display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 8px 9px; border: 0; background: none; border-radius: 9px; font: inherit;
+    font-size: 13px; color: #45443f; cursor: pointer; text-align: left;
+    letter-spacing: -0.02em; }
+  .lgv2 .lg-rail button:hover { background: #f4f3ec; }
+  .lgv2 .lg-rail button.on { background: #1c2b4a; color: #fff; font-weight: 600; }
+  .lgv2 .lg-rail .nm { flex: 1; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; }
+  .lgv2 .lg-rail .ct { font-size: 11.5px; color: #8a897f; font-variant-numeric: tabular-nums; }
+  .lgv2 .lg-rail button.on .ct { color: rgba(255,255,255,.75); }
+  .lgv2 .lg-rail .swatch { width: 16px; height: 11px; border-radius: 3px; flex: none;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.10); }
   .lgv2 .lg-mapwrap { position: relative; background: #eef6fc; margin: 0 auto;
-    border: 1px solid #dde7ef; border-radius: 14px; overflow: hidden; }
+    border: 1px solid #dde7ef; border-radius: 14px; overflow: hidden; flex: 1;
+    min-width: 0; }
+  @media (max-width: 768px) {
+    .lgv2 .lg-board { flex-direction: column; gap: 10px; }
+    .lgv2 .lg-rail { flex: none; width: 100%; flex-direction: row; overflow-x: auto;
+      padding: 7px; gap: 6px; scrollbar-width: none; }
+    .lgv2 .lg-rail::-webkit-scrollbar { display: none; }
+    .lgv2 .lg-rail button { width: auto; flex: none; padding: 7px 10px; }
+    .lgv2 .lg-rail .ct { display: none; }
+    .lgv2 .lg-mapwrap { width: 100%; }
+  }
   .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none; }
   /* 경계선 3단 위계 (2026-08-12 저녁 재설계).
      ⚠ 종전의 **흰색** 시군구 선이 "색 위에 막을 씌운" 인상의 주범이었다 —
@@ -233,6 +263,9 @@ export function getStaticPaths() {
     filter: drop-shadow(0 3px 5px rgba(15,23,42,.45)); }
   /* 육지 전체에 아주 옅은 그림자 — 바다 위에 놓인 판처럼 보이게 */
   .lgv2 #lgRegions { filter: drop-shadow(0 1px 1.5px rgba(30,50,80,.16)); }
+  /* 고른 채널이 1위인 지역 — 살짝 떠오른다 */
+  .lgv2 #lgMap path.won { stroke: rgba(255,255,255,.85); stroke-width: 1;
+    filter: drop-shadow(0 2px 4px rgba(15,23,42,.35)); }
   /* 시도(광역) = 시군구보다 "조금 더" 강할 뿐 — 극단적 대비 금지 */
   .lgv2 #lgSidoLines path { fill: none; stroke: #334155; stroke-width: 1.5;
     opacity: .9; pointer-events: none; vector-effect: non-scaling-stroke;
@@ -386,38 +419,94 @@ export function getStaticPaths() {
       fitCard();
       applyVB();
     }
+    buildGradients();
     paint();
+    buildRail();
     buildLabels();
     updateLabels();
     buildNational();
   });
 
-  // 지도에 몇 색을 쓸 것인가 (비교용 — 운영자 판단 대상 2026-08-12 밤)
-  //   기본        = 채널 13색 전부 (지금 화면)
-  //   ?map=top5  = **전국 상위 5개만 색**, 나머지는 중립색 하나로 묶음.
-  //                차트와 같은 색 문법이 되고, 지도가 훨씬 조용해진다.
-  const MAP_MODE = new URLSearchParams(location.search).get('map') || '';
-  const OTHER_FILL = '#aeb8c2';
-  let topColorSet = null;
+  // 지도의 기본 상태는 **조용하다** (운영자 설계 2026-08-12 밤):
+  //   기본      = 전 지역 중립색 한 가지
+  //   채널 선택 = 그 채널이 1위인 지역만 **국기색 그라데이션**으로 떠오름
+  // 12색을 한꺼번에 뿌리지 않으므로 "알록달록"이 구조적으로 생기지 않는다.
+  const IDLE_FILL = '#dfe6ec';   // 아무 채널도 안 고른 상태
+  const REST_FILL = '#e9eef3';   // 채널을 골랐을 때 그 외 지역 (한 톤 더 옅게)
+  let activeCh = null;
 
   function paint() {
     if (!DATA) return;
-    if (MAP_MODE === 'top5' && DATA.national && !topColorSet) {
-      const rk = DATA.national.rank;
-      const last = (c) => rk[c][rk[c].length - 1];
-      topColorSet = new Set(Object.keys(rk).sort((a, b) => last(a) - last(b)).slice(0, 5));
-    }
     // ⚠ 반드시 `path[data-g]`만 — 그냥 `path`로 돌면 **시도 경계선 레이어까지 칠해진다.**
     //   그 path는 전국 윤곽을 한 덩어리로 갖고 있어서, 채워지는 순간 지도 전체에
     //   회색 막이 덮이고 지역색이 그 아래로 비쳐 파스텔처럼 보였다
     //   (2026-08-12 "무슨 막 씌워놓은 것 같다"의 진짜 원인 — 색 팔레트 문제가 아니었다).
     for (const p of svg.querySelectorAll('path[data-g]')) {
       const r = DATA.regions[p.dataset.g];
+      p.classList.remove('won');
       if (collecting || !r) { p.style.fill = COLLECT_FILL; continue; }
-      const win = r.t[0][0];
-      p.style.fill = topColorSet && !topColorSet.has(win)
-        ? OTHER_FILL : toneOf(DATA.channels[win].c);
+      if (!activeCh) { p.style.fill = IDLE_FILL; continue; }
+      if (r.t[0][0] === activeCh) {
+        p.style.fill = `url(#g-${activeCh})`;
+        p.classList.add('won');            // 살짝 떠오르는 그림자
+      } else {
+        p.style.fill = REST_FILL;
+      }
     }
+    if (activeCh) {   // 떠오른 지역을 맨 위로 (그림자가 이웃에 가리지 않게)
+      const g = svg.querySelector('#lgRegions');
+      svg.querySelectorAll('#lgRegions path.won').forEach((p) => g.appendChild(p));
+    }
+  }
+
+  // 국기색 그라데이션 — 지도 전체를 가로지르는 **한 장의 천**처럼 보이도록
+  // userSpaceOnUse로 좌표를 고정한다(지역마다 따로 지면 지저분해진다).
+  function buildGradients() {
+    const NS = 'http://www.w3.org/2000/svg';
+    const defs = document.createElementNS(NS, 'defs');
+    for (const [code, ch] of Object.entries(DATA.channels)) {
+      const lg = document.createElementNS(NS, 'linearGradient');
+      lg.id = `g-${code}`;
+      lg.setAttribute('gradientUnits', 'userSpaceOnUse');
+      lg.setAttribute('x1', '90'); lg.setAttribute('y1', '60');
+      lg.setAttribute('x2', '640'); lg.setAttribute('y2', '800');
+      const stops = ch.g || [ch.c, ch.c];
+      stops.forEach((col, i) => {
+        const st = document.createElementNS(NS, 'stop');
+        st.setAttribute('offset', `${(i / (stops.length - 1)) * 100}%`);
+        st.setAttribute('stop-color', col);
+        lg.appendChild(st);
+      });
+      defs.appendChild(lg);
+    }
+    svg.insertBefore(defs, svg.firstChild);
+  }
+
+  // 채널 목록 (고정 순서) — 1위 지역 수를 함께 보여준다
+  function buildRail() {
+    const rail = $('lgRail');
+    const wins = {};
+    for (const r of Object.values(DATA.regions)) {
+      wins[r.t[0][0]] = (wins[r.t[0][0]] || 0) + 1;
+    }
+    rail.innerHTML = Object.entries(DATA.channels)
+      .filter(([code]) => code !== 'om_kma' || wins[code])   // 미공개 채널은 숨김
+      .map(([code, ch]) => `<button type="button" data-ch="${code}">
+        <span class="swatch" style="background:linear-gradient(135deg,${
+          (ch.g || [ch.c, ch.c]).join(',')})"></span>
+        <span class="nm">${ch.n}</span>
+        <span class="ct">${wins[code] || 0}</span></button>`).join('');
+    rail.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-ch]');
+      if (!b) return;
+      activeCh = activeCh === b.dataset.ch ? null : b.dataset.ch;   // 다시 누르면 해제
+      rail.querySelectorAll('button').forEach((x) =>
+        x.classList.toggle('on', x.dataset.ch === activeCh));
+      paint();
+      $('lgCapLead').textContent = activeCh
+        ? `${DATA.channels[activeCh].n}이 1위인 지역이 떠올라 있어요 (다시 누르면 해제)`
+        : '채널을 고르면 그 채널이 1위인 지역이 떠올라요';
+    });
   }
 
   function chIcon(code, cls = 'lg-flag') {
