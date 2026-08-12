@@ -217,10 +217,9 @@ export function getStaticPaths() {
   .lgv2 .lg-btn--primary:hover { background: #26375e; }
   /* 배경 = 바다. 목적은 "바다는 파랗다"가 아니라 **육지를 돋보이게 하는 것** —
      탁한 청회색은 화면 전체를 눌렀다(2026-08-12 저녁 재조정). 거의 흰빛 하늘색으로. */
-  .lgv2 .lg-mapwrap { position: relative; background: #eef6fc;
+  .lgv2 .lg-mapwrap { position: relative; background: #eef6fc; margin: 0 auto;
     border: 1px solid #dde7ef; border-radius: 14px; overflow: hidden; }
-  .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none;
-    max-height: 78vh; }
+  .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none; }
   /* 경계선 3단 위계 (2026-08-12 저녁 재설계).
      ⚠ 종전의 **흰색** 시군구 선이 "색 위에 막을 씌운" 인상의 주범이었다 —
      전국 축척에서 250개 지역에 두른 흰 선이 각 면적의 큰 몫을 먹어 색에 흰색이
@@ -344,7 +343,16 @@ export function getStaticPaths() {
 
   const $ = (id) => document.getElementById(id);
   const isMobile = () => matchMedia('(max-width: 768px)').matches;
-  addEventListener('resize', () => scheduleLabels());
+  // 지도 카드 폭을 지도 비율에 맞춘다 (좌우 빈 바다 제거).
+  // 모바일은 화면이 세로로 길어 그대로 100%를 쓴다.
+  function fitCard() {
+    const wrapEl = document.getElementById('lgWrap');
+    if (!wrapEl || !VB.w) return;
+    if (isMobile()) { wrapEl.style.maxWidth = ''; return; }
+    const maxH = Math.min(innerHeight * 0.82, 820);
+    wrapEl.style.maxWidth = `${Math.round(maxH * (VB.w / VB.h))}px`;
+  }
+  addEventListener('resize', () => { fitCard(); scheduleLabels(); });
 
   // ── 데이터 로드 & 칠하기 & 라벨 ─────────────────────────────────────
   const COLLECT_FILL = '#e4e3da';
@@ -353,12 +361,13 @@ export function getStaticPaths() {
   fetch(`${base}/league/demo.json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => {
     DATA = d;
     if (d.home) {
-      // 첫 화면은 본토 중심. 세로 비율은 화면 비율에 맞춰 넓은 쪽을 기준으로 잡는다
+      // 첫 화면 = 육지 범위 그대로(세로로 긴 비율). 지도 카드 폭을 이 비율에 맞춰
+      // 좁히면 좌우 바다 여백이 사라지고 육지가 화면을 꽉 채운다 — 종전에는 넓은
+      // 카드에 세로로 긴 지도가 들어가 좌우가 통째로 빈 바다였다(2026-08-12).
       const [hx, hy, hw, hh] = d.home;
-      const w = Math.max(hw, (hh * FULL.w) / FULL.h);
-      const h = FULL.h * (w / FULL.w);
-      VB = { x: hx + hw / 2 - w / 2, y: hy + hh / 2 - h / 2, w, h };
+      VB = { x: hx, y: hy, w: hw, h: hh };
       vb = { ...VB };
+      fitCard();
       applyVB();
     }
     paint();
@@ -470,7 +479,7 @@ export function getStaticPaths() {
     vb.x = px - (px - vb.x) / real;
     vb.y = py - (py - vb.y) / real;
     vb.w = w;
-    vb.h = FULL.h * (w / FULL.w);
+    vb.h = VB.h * (w / VB.w);      // 카드 비율과 어긋나면 여백이 생긴다
     clampPan();
     applyVB();
   }
@@ -490,9 +499,9 @@ export function getStaticPaths() {
   }
   function zoomToRegion(g) {
     const b = DATA.regions[g].b;
-    const w = Math.min(Math.max(Math.max(b[2] * 4.5, (b[3] * 4.5 * FULL.w) / FULL.h),
+    const w = Math.min(Math.max(Math.max(b[2] * 4.5, (b[3] * 4.5 * VB.w) / VB.h),
       MINW), FULL.w);
-    const h = FULL.h * (w / FULL.w);
+    const h = VB.h * (w / VB.w);
     animateTo({ x: b[0] + b[2] / 2 - w / 2, y: b[1] + b[3] / 2 - h / 2, w, h });
   }
 
