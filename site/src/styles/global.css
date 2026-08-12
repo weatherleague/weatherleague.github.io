@@ -74,7 +74,17 @@ img { max-width: 100%; }
   font-size: 1.08rem;
 }
 .logo img { width: 30px; height: 30px; border-radius: 8px; }
+.logo, .nav-link, .nav .btn { white-space: nowrap; }
 .nav { display: flex; align-items: center; gap: 18px; }
+/* 좁은 화면에서는 간격·글자를 줄여 한 줄을 지킨다 (메뉴가 늘면 줄바꿈으로
+   헤더가 무너진다 — '예보 순위' 추가 때 실측, 2026-08-12) */
+@media (max-width: 560px) {
+  .nav { gap: 2px; }
+  .nav-link { padding: 8px 6px; font-size: .84rem; }
+  .logo { font-size: .98rem; gap: 6px; }
+  .logo img { width: 26px; height: 26px; }
+  .nav .btn { padding: 9px 11px; font-size: .84rem; }
+}
 .nav-link {
   padding: 8px 12px;
   font-weight: 600;
