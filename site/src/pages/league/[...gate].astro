@@ -235,8 +235,9 @@ export function getStaticPaths() {
     text-overflow: ellipsis; }
   .lgv2 .lg-rail .ct { font-size: 11.5px; color: #8a897f; font-variant-numeric: tabular-nums; }
   .lgv2 .lg-rail button.on .ct { color: rgba(255,255,255,.75); }
-  .lgv2 .lg-rail .swatch { width: 16px; height: 11px; border-radius: 3px; flex: none;
-    box-shadow: 0 0 0 1px rgba(0,0,0,.10); }
+  /* 주변국 윤곽 — 배경 장식. 클릭 대상이 아니다 */
+  .lgv2 #lgNeighbors path { fill: #e2e8ee; stroke: #cfd8e1; stroke-width: .8;
+    vector-effect: non-scaling-stroke; pointer-events: none; }
   .lgv2 .lg-mapwrap { position: relative; background: #eef6fc; margin: 0 auto;
     border: 1px solid #dde7ef; border-radius: 14px; overflow: hidden; flex: 1;
     min-width: 0; }
@@ -468,7 +469,6 @@ export function getStaticPaths() {
     rail.innerHTML = Object.entries(DATA.channels)
       .filter(([code]) => code !== 'om_kma' || wins[code])   // 미공개 채널은 숨김
       .map(([code, ch]) => `<button type="button" data-ch="${code}">
-        <span class="swatch" style="background:${ch.c}"></span>
         ${chIcon(code)}<span class="nm">${ch.n}</span>
         <span class="ct">${wins[code] || 0}</span></button>`).join('');
     rail.addEventListener('click', (e) => {
