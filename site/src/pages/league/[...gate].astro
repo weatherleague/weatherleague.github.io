@@ -184,13 +184,13 @@ export function getStaticPaths() {
   .lgv2 .lg-chartwrap .axis { font-size: 11px; fill: var(--muted); }
   .lgv2 .lg-chartwrap .ln { fill: none; stroke-width: 2.2; stroke-linejoin: round;
     stroke-linecap: round; }
-  .lgv2 .lg-chartwrap .ln--sub { stroke-width: 1.3; opacity: .38; }
+  .lgv2 .lg-chartwrap .ln--sub { stroke-width: 1.3; stroke: #b9c4d0; }
   .lgv2 .lg-chartwrap .dot { stroke: #fff; stroke-width: 2; }
   .lgv2 .lg-chartwrap .cross { stroke: rgba(22, 48, 79, .28); stroke-width: 1;
     stroke-dasharray: 3 3; }
   .lgv2 .lg-chartwrap .endlbl { font-size: 11.5px; font-weight: 600;
     letter-spacing: -0.03em; }
-  .lgv2 .lg-chartwrap .endlbl--sub { font-size: 11px; font-weight: 500; opacity: .72; }
+  .lgv2 .lg-chartwrap .endlbl--sub { font-size: 11px; font-weight: 500; fill: #93a1b0; }
   .lgv2 .lg-cttip { position: absolute; pointer-events: none; background: #fff;
     border-radius: 12px; padding: 11px 13px; font-size: 13px; min-width: 178px;
     box-shadow: 0 6px 28px rgba(22, 48, 79, .18); }
@@ -835,15 +835,19 @@ export function getStaticPaths() {
         const acc = pos.coords.accuracy || 0;
         const accTxt = acc >= 1000 ? `±${(acc / 1000).toFixed(1)}km` : `±${Math.round(acc)}m`;
         const g = judgeRegion(lon, lat);
+        // 정확도에 따라 3단계 (2026-08-13): PC는 GPS가 없어 Wi-Fi·IP로 잡히므로
+        // 정확도가 수 km인 것이 보통이다. 무조건 거절하면 PC에서 늘 막히고,
+        // 무조건 이동하면 옆 동네 오판이 조용히 지나간다 → 이동시키되 알린다.
         if (!g) {
           toast(`서비스 지역 밖입니다 · 위치 정확도 ${accTxt}`);
-        } else if (acc > 1200) {
-          // 대략적 위치(네트워크 측위)면 자동 선택하지 않는다 — 오판 경험 방지
-          toast(`위치 정확도가 낮습니다 (${accTxt}) · 지역 검색을 이용해 주세요`);
+        } else if (acc > 8000) {
+          toast(`위치를 대략적으로만 확인할 수 있습니다 (${accTxt}) · 지역 검색을 이용해 주세요`);
         } else {
-          toast(`${DATA.regions[g].n} · 위치 정확도 ${accTxt}`);
           zoomToRegion(g);
           setTimeout(() => select(g), 280);
+          toast(acc > 1200
+            ? `${DATA.regions[g].n} 부근으로 이동했습니다 · 대략적 위치 ${accTxt}`
+            : `${DATA.regions[g].n} · 위치 정확도 ${accTxt}`);
         }
       }, () => {
         btn.disabled = false;
@@ -941,9 +945,9 @@ export function getStaticPaths() {
     const line = (c) => N.rank[c].map((r, i) =>
       `${px(i).toFixed(1)},${py(r).toFixed(1)}`).join(' ');
     // 하위권을 먼저 흐리게 깔고 상위권을 위에 — 범례 없이 선 끝 이름으로 식별한다
+    // 6위 이하는 선·이름표 모두 회색 — 상위 5개에 시선을 몰아준다 (운영자 2026-08-13)
     natOrder.slice(HIGHLIGHT).forEach((c) =>
-      parts.push(`<polyline class="ln ln--sub" style="stroke:${DATA.channels[c].c}"
-        points="${line(c)}"/>`));
+      parts.push(`<polyline class="ln ln--sub" points="${line(c)}"/>`));
     natOrder.slice(0, HIGHLIGHT).forEach((c) =>
       parts.push(`<polyline class="ln" style="stroke:${DATA.channels[c].c}"
         points="${line(c)}"/>`));
@@ -955,9 +959,9 @@ export function getStaticPaths() {
           fill="${DATA.channels[c].c}"/>`);
       }
       if (!isMobile()) {   // 선 끝 이름표 (범례 대체)
+        const col = top ? `style="fill:${DATA.channels[c].c}"` : '';
         parts.push(`<text class="endlbl${top ? '' : ' endlbl--sub'}"
-          x="${px(days - 1) + 11}" y="${py(lr) + 4}"
-          style="fill:${DATA.channels[c].c}">${DATA.channels[c].n}</text>`);
+          x="${px(days - 1) + 11}" y="${py(lr) + 4}" ${col}>${DATA.channels[c].n}</text>`);
       }
     });
     parts.push(`<line id="ctCross" class="cross" x1="0" x2="0" y1="${M.t}"
