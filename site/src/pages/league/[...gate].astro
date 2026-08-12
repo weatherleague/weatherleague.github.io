@@ -123,10 +123,15 @@ export function getStaticPaths() {
   .lgv2 #lgMap path { stroke: #fff; stroke-width: .8; cursor: pointer;
     vector-effect: non-scaling-stroke; }
   .lgv2 #lgMap path.sel { stroke: #1d1d1b; stroke-width: 1.8; }
-  /* 시도(광역) 경계선 — 클릭을 가로채지 않는 표시 전용 층 */
-  .lgv2 #lgSidoLines path { fill: none; stroke: #55544c; stroke-width: 1.1;
-    opacity: .6; pointer-events: none; vector-effect: non-scaling-stroke;
+  /* 시도(광역) 경계선 — 클릭을 가로채지 않는 표시 전용 층.
+     굵기는 화면 픽셀 고정(non-scaling)이라 지도가 큰 PC에서는 상대적으로 가늘어
+     보인다 → 넓은 화면에서 더 굵고 진하게 (2026-08-12 운영자 지적) */
+  .lgv2 #lgSidoLines path { fill: none; stroke: #3d3c36; stroke-width: 1.2;
+    opacity: .72; pointer-events: none; vector-effect: non-scaling-stroke;
     stroke-linejoin: round; }
+  @media (min-width: 769px) {
+    .lgv2 #lgSidoLines path { stroke-width: 2; opacity: .85; }
+  }
   /* 지명 라벨 — SVG 밖 HTML 오버레이 (SVG 텍스트는 확대 시 폰 GPU가 글자를
      뭉갠다, 2026-08-12 실기기 피드백). 위치는 JS가 매 프레임 화면 좌표로 환산 */
   .lgv2 .lg-lbls { position: absolute; inset: 0; pointer-events: none;
