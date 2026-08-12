@@ -91,6 +91,9 @@ const MAIL = 'contact.weatherleague@gmail.com';
           웨더리그
         </a>
         <nav class="nav" aria-label="주 메뉴">
+          {/* 예보 순위 탭은 아직 미리보기에만 있다 — 공개 게이트 = v4 종합순위 공개
+              가능 상태(BACKLOG 웹 트랙 ③). 본 사이트에 링크를 걸면 404가 된다. */}
+          {isPreview && <a class="nav-link" href={`${base}/league/`}>예보 순위</a>}
           <a class="nav-link" href={`${base}/blog/`}>블로그</a>
           {/* ⚠ mailto는 **메일 앱이 없는 PC에서 아무 반응도 하지 않는다**(윈도우 실측 2026-08-10).
               누른 사람 입장에선 버튼이 고장 난 것으로 보인다. 그래서 누를 때 주소를 클립보드에

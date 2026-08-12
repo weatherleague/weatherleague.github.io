@@ -21,17 +21,47 @@ export function getStaticPaths() {
 ---
 
 <Base
-  title="리그 현황 (개발 중) — 웨더리그"
-  description="우리 동네 1위 날씨 채널 — 시군구 지도에서 확인하세요."
+  title="예보 순위 (개발 중) — 웨더리그"
+  description="전국 예보 순위와 우리 동네 1위 날씨 채널을 한눈에."
   path="/league/"
 >
   <main class="lgv2">
     <div class="container">
-      <h1>우리 동네 1위 날씨 채널</h1>
+      <h1>예보 순위</h1>
       <p class="lg-note">
-        시제품 v3 — <b>화면의 순위·점수는 전부 데모(무작위)입니다.</b>
-        지도를 확대하고, 지역을 눌러 보세요.
+        시제품 v4 — <b>화면의 순위·점수는 전부 데모(무작위)입니다.</b>
+        실제 값은 새 채점 체계가 준비되면 연결됩니다.
       </p>
+
+      <div class="lg-tabs" role="tablist" aria-label="보기 전환">
+        <button id="tabNat" class="lg-tab on" type="button" role="tab"
+                aria-selected="true" aria-controls="secNat">전국 순위</button>
+        <button id="tabMap" class="lg-tab" type="button" role="tab"
+                aria-selected="false" aria-controls="secMap">우리 동네 지도</button>
+      </div>
+
+      <section id="secNat" class="lg-sec" role="tabpanel" aria-labelledby="tabNat">
+        <h2 class="lg-h2">전국에서 요즘 누가 잘 맞히고 있나요?</h2>
+        <p class="lg-sub">최근 30일 · 전국 평균 웨더리그 점수</p>
+        <div id="natTop" class="lg-podium"></div>
+
+        <div class="lg-chartcard">
+          <div class="lg-charthead">
+            <h3>순위 변화</h3>
+            <p>최근 30일 · 위로 갈수록 높은 순위</p>
+          </div>
+          <div id="natChart" class="lg-chartwrap"></div>
+          <div id="natLegend" class="lg-legend"></div>
+          <details class="lg-table">
+            <summary>표로 보기</summary>
+            <div id="natTable"></div>
+          </details>
+        </div>
+      </section>
+
+      <section id="secMap" class="lg-sec" role="tabpanel" aria-labelledby="tabMap" hidden>
+        <h2 class="lg-h2">우리 동네에서는 누가 1위일까요?</h2>
+        <p class="lg-sub">지역을 눌러 1~3위를 확인하세요</p>
 
       <div class="lg-toolbar">
         <div class="lg-search">
@@ -78,6 +108,7 @@ export function getStaticPaths() {
       </div>
       <p class="lg-caption">각 지역은 현재 1위 채널의 색으로 표시됩니다 ·
         내 위치는 브라우저 안에서만 판정하며 좌표를 서버로 보내지 않아요.</p>
+      </section>
     </div>
 
     <div id="lgToast" class="lg-toast" role="status"></div>
@@ -88,6 +119,74 @@ export function getStaticPaths() {
   .lgv2 { padding: 26px 0 70px; }
   .lgv2 h1 { font-size: 24px; letter-spacing: -0.03em; }
   .lgv2 .lg-note { color: #6d6c64; font-size: 14px; margin: 6px 0 16px; }
+  /* 탭 — 전국 순위 / 우리 동네 지도 */
+  .lgv2 .lg-tabs { display: flex; gap: 4px; background: #ecebe2; padding: 4px;
+    border-radius: 12px; margin-bottom: 18px; }
+  .lgv2 .lg-tab { flex: 1; border: 0; background: none; padding: 10px 14px;
+    border-radius: 9px; font: inherit; font-size: 14px; font-weight: 600;
+    color: #6d6c64; cursor: pointer; letter-spacing: -0.02em; }
+  .lgv2 .lg-tab.on { background: #fff; color: #1d1d1b;
+    box-shadow: 0 1px 3px rgba(0,0,0,.09); }
+  .lgv2 .lg-h2 { font-size: 19px; letter-spacing: -0.03em; }
+  .lgv2 .lg-sub { font-size: 13px; color: #8a897f; margin: 4px 0 14px; }
+  /* 전국 시상대 (1·2·3위) */
+  .lgv2 .lg-podium { display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-bottom: 20px; }
+  .lgv2 .lg-pod { background: #fff; border: 1px solid #e5e4db; border-radius: 13px;
+    padding: 14px; text-align: center; }
+  .lgv2 .lg-pod--1 { border-color: #1c2b4a; box-shadow: 0 3px 14px rgba(28,43,74,.13); }
+  .lgv2 .lg-pod .rk { display: inline-block; font-size: 11.5px; font-weight: 700;
+    color: #6d6c64; background: #ecebe2; border-radius: 6px; padding: 2px 8px; }
+  .lgv2 .lg-pod--1 .rk { background: #1c2b4a; color: #fff; }
+  .lgv2 .lg-pod .ic { display: block; margin: 10px auto 7px; }
+  .lgv2 .lg-pod .nm { font-size: 13.5px; font-weight: 600; letter-spacing: -0.02em;
+    line-height: 1.35; }
+  .lgv2 .lg-pod .sc { font-size: 24px; font-weight: 700; margin-top: 6px;
+    font-variant-numeric: tabular-nums; }
+  .lgv2 .lg-pod .sc small { font-size: 11px; font-weight: 400; color: #8a897f;
+    display: block; margin-top: 1px; }
+  /* 차트 */
+  .lgv2 .lg-chartcard { background: #fff; border: 1px solid #e5e4db;
+    border-radius: 14px; padding: 18px; }
+  .lgv2 .lg-charthead h3 { font-size: 15px; letter-spacing: -0.02em; }
+  .lgv2 .lg-charthead p { font-size: 12px; color: #8a897f; margin: 3px 0 12px; }
+  .lgv2 .lg-chartwrap { position: relative; }
+  .lgv2 .lg-chartwrap svg { display: block; width: 100%; height: auto; }
+  .lgv2 .lg-chartwrap .grid { stroke: #eeede6; stroke-width: 1; }
+  .lgv2 .lg-chartwrap .axis { font-size: 10.5px; fill: #8a897f; }
+  .lgv2 .lg-chartwrap .ln { fill: none; stroke-width: 2; stroke-linejoin: round;
+    stroke-linecap: round; }
+  .lgv2 .lg-chartwrap .ln--mut { stroke: #d6d5cc; stroke-width: 1.2; }
+  .lgv2 .lg-chartwrap .dot { stroke: #fff; stroke-width: 2; }
+  .lgv2 .lg-chartwrap .cross { stroke: #b6b5ab; stroke-width: 1; stroke-dasharray: 3 3; }
+  .lgv2 .lg-cttip { position: absolute; pointer-events: none; background: #fff;
+    border: 1px solid #e0dfd6; border-radius: 10px; padding: 9px 11px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.13); font-size: 12.5px; min-width: 168px; }
+  .lgv2 .lg-cttip .dt { font-size: 11px; color: #8a897f; margin-bottom: 5px; }
+  .lgv2 .lg-cttip .r { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+  .lgv2 .lg-cttip .r .rk { width: 22px; color: #8a897f; font-size: 11px; }
+  .lgv2 .lg-cttip .r .nm { flex: 1; letter-spacing: -0.02em; }
+  .lgv2 .lg-cttip .r .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lgv2 .lg-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px;
+    font-size: 12.5px; color: #45443f; }
+  .lgv2 .lg-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .lgv2 .lg-legend i { width: 14px; height: 3px; border-radius: 2px; }
+  .lgv2 .lg-table { margin-top: 14px; font-size: 13px; }
+  .lgv2 .lg-table summary { cursor: pointer; color: #6d6c64; font-size: 12.5px; }
+  .lgv2 .lg-table table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .lgv2 .lg-table th, .lgv2 .lg-table td { text-align: left; padding: 7px 6px;
+    border-bottom: 1px solid #f0efe8; }
+  .lgv2 .lg-table th { font-size: 11.5px; color: #8a897f; font-weight: 600; }
+  .lgv2 .lg-table td.num { text-align: right; font-variant-numeric: tabular-nums;
+    font-weight: 600; }
+  @media (max-width: 560px) {
+    .lgv2 .lg-podium { grid-template-columns: 1fr; }
+    .lgv2 .lg-pod { display: flex; align-items: center; gap: 10px; text-align: left; }
+    .lgv2 .lg-pod .ic { margin: 0; }
+    .lgv2 .lg-pod .nm { flex: 1; }
+    .lgv2 .lg-pod .sc { font-size: 20px; margin-top: 0; }
+    .lgv2 .lg-pod .sc small { display: inline; margin-left: 3px; }
+  }
   .lgv2 .lg-toolbar { display: flex; gap: 10px; align-items: center;
     flex-wrap: wrap; margin-bottom: 12px; }
   .lgv2 .lg-search { position: relative; flex: 1 1 220px; max-width: 340px; }
@@ -245,6 +344,7 @@ export function getStaticPaths() {
     paint();
     buildLabels();
     updateLabels();
+    buildNational();
   });
 
   function paint() {
@@ -548,6 +648,145 @@ export function getStaticPaths() {
       toast('데모 버튼이에요 — 실제 화면에서는 앱으로 이동해요');
     }
   });
+
+  // ── 탭 전환 ─────────────────────────────────────────────────────────
+  function showTab(nat) {
+    $('tabNat').classList.toggle('on', nat);
+    $('tabMap').classList.toggle('on', !nat);
+    $('tabNat').setAttribute('aria-selected', String(nat));
+    $('tabMap').setAttribute('aria-selected', String(!nat));
+    $('secNat').hidden = !nat;
+    $('secMap').hidden = nat;
+    if (!nat) scheduleLabels();       // 숨은 동안 계산이 어긋나 있을 수 있다
+    else drawChart();                 // 폭이 바뀌었을 수 있다
+  }
+  $('tabNat').addEventListener('click', () => showTab(true));
+  $('tabMap').addEventListener('click', () => showTab(false));
+
+  // ── 전국 순위: 시상대 + 순위 변화 차트 ──────────────────────────────
+  // 순위 변화(bump) 차트: 세로축 = 순위(위가 1위), 상위 5개만 색으로 강조하고
+  // 나머지는 회색 얇은 선 — 13줄을 전부 칠하면 색으로 구분이 불가능해진다.
+  const HIGHLIGHT = 5;
+  let natOrder = [];      // 최종 순위대로 정렬된 채널 코드
+  function buildNational() {
+    const N = DATA.national;
+    const codes = Object.keys(N.rank);
+    natOrder = codes.slice().sort((a, b) =>
+      N.rank[a][N.rank[a].length - 1] - N.rank[b][N.rank[b].length - 1]);
+
+    // 시상대 3
+    $('natTop').innerHTML = natOrder.slice(0, 3).map((c, i) => {
+      const ch = DATA.channels[c];
+      const sq = ch.i.endsWith('.svg');
+      return `<div class="lg-pod lg-pod--${i + 1}">
+        <span class="rk">${i + 1}위</span>
+        <img class="ic ${sq ? 'lg-flag lg-flag--sq' : 'lg-flag'}"
+             style="width:${sq ? 30 : 34}px;height:${sq ? 30 : 24}px"
+             src="${base}/league/ch/${ch.i}" alt="">
+        <div class="nm">${ch.n}</div>
+        <div class="sc">${N.score[c][N.score[c].length - 1]}
+          <small>웨더리그 점수</small></div>
+      </div>`;
+    }).join('');
+
+    // 범례 (강조 5개만 — 나머지는 표로 보기에서 확인)
+    $('natLegend').innerHTML = natOrder.slice(0, HIGHLIGHT).map((c) =>
+      `<span><i style="background:${DATA.channels[c].c}"></i>${DATA.channels[c].n}</span>`)
+      .join('') + `<span><i style="background:#d6d5cc"></i>그 외 채널</span>`;
+
+    // 표로 보기 (색·선 없이도 읽을 수 있는 대체 경로)
+    $('natTable').innerHTML = `<table><thead><tr><th>순위</th><th>채널</th>
+      <th class="num">점수</th><th class="num">30일 전 순위</th></tr></thead><tbody>` +
+      natOrder.map((c, i) => `<tr><td>${i + 1}위</td><td>${DATA.channels[c].n}</td>
+        <td class="num">${N.score[c][N.score[c].length - 1]}</td>
+        <td class="num">${N.rank[c][0]}위</td></tr>`).join('') + `</tbody></table>`;
+
+    drawChart();
+    addEventListener('resize', drawChart);
+  }
+
+  let chartGeom = null;
+  function drawChart() {
+    if (!DATA || $('secNat').hidden) return;
+    const N = DATA.national;
+    const host = $('natChart');
+    const W = host.clientWidth || 640;
+    const H = Math.max(240, Math.min(340, W * 0.52));
+    const M = { t: 12, r: isMobile() ? 12 : 96, b: 26, l: 30 };
+    const days = N.dates.length;
+    const maxRank = Object.keys(N.rank).length;
+    const px = (i) => M.l + (i / (days - 1)) * (W - M.l - M.r);
+    const py = (r) => M.t + ((r - 1) / (maxRank - 1)) * (H - M.t - M.b);
+    chartGeom = { W, H, M, days, px, py };
+
+    const parts = [];
+    // 가로 격자 + 순위 눈금
+    for (const r of [1, 5, 10, maxRank]) {
+      if (r > maxRank) continue;
+      parts.push(`<line class="grid" x1="${M.l}" x2="${W - M.r}" y1="${py(r)}" y2="${py(r)}"/>`);
+      parts.push(`<text class="axis" x="${M.l - 7}" y="${py(r) + 3.5}"
+        text-anchor="end">${r}위</text>`);
+    }
+    // 날짜 눈금 (처음·중간·끝)
+    for (const i of [0, Math.floor((days - 1) / 2), days - 1]) {
+      const d = N.dates[i].slice(5).replace('-', '/');
+      parts.push(`<text class="axis" x="${px(i)}" y="${H - 8}"
+        text-anchor="${i === 0 ? 'start' : i === days - 1 ? 'end' : 'middle'}">${d}</text>`);
+    }
+    // 선 — 회색(그 외)을 먼저 깔고 강조 5개를 위에 올린다
+    const line = (c) => N.rank[c].map((r, i) => `${px(i).toFixed(1)},${py(r).toFixed(1)}`).join(' ');
+    natOrder.slice(HIGHLIGHT).forEach((c) =>
+      parts.push(`<polyline class="ln ln--mut" points="${line(c)}"/>`));
+    natOrder.slice(0, HIGHLIGHT).forEach((c) => {
+      parts.push(`<polyline class="ln" style="stroke:${DATA.channels[c].c}" points="${line(c)}"/>`);
+      const lr = N.rank[c][days - 1];
+      parts.push(`<circle class="dot" cx="${px(days - 1)}" cy="${py(lr)}" r="4.5"
+        fill="${DATA.channels[c].c}"/>`);
+      if (!isMobile()) {   // 넓은 화면에서만 선 끝에 이름 직접 표기
+        parts.push(`<text class="axis" x="${px(days - 1) + 10}" y="${py(lr) + 3.5}"
+          style="fill:#45443f;font-weight:600">${DATA.channels[c].n}</text>`);
+      }
+    });
+    parts.push(`<line id="ctCross" class="cross" x1="0" x2="0" y1="${M.t}"
+      y2="${H - M.b}" style="display:none"/>`);
+
+    host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="최근 30일 전국 순위 변화">${parts.join('')}</svg>
+      <div id="ctTip" class="lg-cttip" hidden></div>`;
+    host.querySelector('svg').addEventListener('pointermove', onChartHover);
+    host.querySelector('svg').addEventListener('pointerleave', () => {
+      const t = $('ctTip'); if (t) t.hidden = true;
+      const cr = $('ctCross'); if (cr) cr.style.display = 'none';
+    });
+  }
+
+  function onChartHover(e) {
+    if (!chartGeom) return;
+    const N = DATA.national;
+    const svgEl = e.currentTarget;
+    const rc = svgEl.getBoundingClientRect();
+    const { W, M, days, px, py } = chartGeom;
+    const xv = ((e.clientX - rc.left) / rc.width) * W;
+    let i = Math.round(((xv - M.l) / (W - M.l - M.r)) * (days - 1));
+    i = Math.max(0, Math.min(days - 1, i));
+    const cross = $('ctCross');
+    cross.setAttribute('x1', px(i));
+    cross.setAttribute('x2', px(i));
+    cross.style.display = '';
+    const top = natOrder.slice().sort((a, b) => N.rank[a][i] - N.rank[b][i]).slice(0, 3);
+    const tip = $('ctTip');
+    tip.innerHTML = `<div class="dt">${N.dates[i].replace(/-/g, '.')}</div>` +
+      top.map((c) => `<div class="r"><span class="rk">${N.rank[c][i]}위</span>
+        ${chIcon(c)}<span class="nm">${DATA.channels[c].n}</span>
+        <span class="sc">${N.score[c][i]}</span></div>`).join('');
+    tip.hidden = false;
+    const hostRc = $('natChart').getBoundingClientRect();
+    const sx = (px(i) / W) * rc.width + (rc.left - hostRc.left);
+    let left = sx + 14;
+    if (left + tip.offsetWidth > hostRc.width) left = sx - tip.offsetWidth - 14;
+    tip.style.left = `${Math.max(0, left)}px`;
+    tip.style.top = `${Math.max(0, py(1) - 6)}px`;
+  }
 
   // ── 지역 검색 ───────────────────────────────────────────────────────
   const q = $('lgQ');
