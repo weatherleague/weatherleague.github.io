@@ -339,6 +339,17 @@ export function getStaticPaths() {
   // 수집 중 상태 확인은 내부용 주소 매개변수로만 (?state=collecting —
   //  화면 토글은 사용자에게 의미가 없다는 운영자 피드백으로 제거, 2026-08-12)
   const collecting = new URLSearchParams(location.search).get('state') === 'collecting';
+  // 색 세기 비교용 (운영자 판단 도구): 기본 = 원색 그대로,
+  //   ?tone=soft  → 흰색을 18% 섞어 한 톤 낮춤
+  //   ?tone=soft2 → 30% (가장 부드러움)
+  const TONE = { soft: 0.18, soft2: 0.30 }[
+    new URLSearchParams(location.search).get('tone')] || 0;
+  function toneOf(hex) {
+    if (!TONE) return hex;
+    const n = parseInt(hex.slice(1), 16);
+    const mix = (c) => Math.round(c + (255 - c) * TONE);
+    return `rgb(${mix((n >> 16) & 255)},${mix((n >> 8) & 255)},${mix(n & 255)})`;
+  }
   let selected = null;
 
   const $ = (id) => document.getElementById(id);
@@ -385,7 +396,7 @@ export function getStaticPaths() {
     for (const p of svg.querySelectorAll('path[data-g]')) {
       const r = DATA.regions[p.dataset.g];
       p.style.fill = collecting || !r ? COLLECT_FILL
-        : DATA.channels[r.t[0][0]].c;
+        : toneOf(DATA.channels[r.t[0][0]].c);
     }
   }
 
