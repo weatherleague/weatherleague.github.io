@@ -113,8 +113,10 @@ export function getStaticPaths() {
   .lgv2 .lg-btn--primary { background: #1c2b4a; color: #fff;
     border-color: #1c2b4a; font-weight: 600; }
   .lgv2 .lg-btn--primary:hover { background: #26375e; }
-  .lgv2 .lg-mapwrap { position: relative; background: #fff;
-    border: 1px solid #e5e4db; border-radius: 14px; overflow: hidden; }
+  /* 배경 = 바다. 연한 청회색이 땅의 채도를 살린다(흰 배경은 색을 눌러 보이게 한다,
+     2026-08-12 운영자 지적). 지도 관례이기도 하다 — 바다는 파랑, 땅은 채색. */
+  .lgv2 .lg-mapwrap { position: relative; background: #dce8f2;
+    border: 1px solid #cfdae5; border-radius: 14px; overflow: hidden; }
   .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none;
     max-height: 78vh; }
   /* vector-effect: 줌 배율과 무관하게 경계선을 화면 픽셀 굵기로 유지 */
@@ -130,10 +132,11 @@ export function getStaticPaths() {
   .lgv2 .lg-lbls { position: absolute; inset: 0; pointer-events: none;
     z-index: 5; overflow: hidden; }
   .lgv2 .lg-lbl { position: absolute; left: 0; top: 0; white-space: nowrap;
-    font-size: 11px; font-weight: 600; color: #46453f; letter-spacing: -0.02em;
-    text-shadow: 0 1px 2px #fff, 0 -1px 2px #fff, 1px 0 2px #fff, -1px 0 2px #fff;
+    font-size: 11px; font-weight: 600; color: #1f1f1c; letter-spacing: -0.02em;
+    text-shadow: 0 1px 2.5px #fff, 0 -1px 2.5px #fff, 1px 0 2.5px #fff,
+      -1px 0 2.5px #fff, 0 0 4px #fff;
     will-change: transform; }
-  .lgv2 .lg-lbl--sido { font-size: 13.5px; font-weight: 700; color: #33322e; }
+  .lgv2 .lg-lbl--sido { font-size: 13.5px; font-weight: 700; }
   .lgv2 .lg-zoom { position: absolute; right: 12px; top: 12px; display: flex;
     flex-direction: column; gap: 6px; }
   .lgv2 .lg-sq { width: 40px; height: 40px; padding: 0; justify-content: center;
@@ -190,8 +193,11 @@ export function getStaticPaths() {
     border-radius: 5px; }
   .lgv2 .lg-hrow .nm { flex: 1; letter-spacing: -0.02em; }
   .lgv2 .lg-hrow .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .lgv2 .lg-hudcta { display: block; margin-top: 6px; font-size: 12px;
-    color: #1c2b4a; text-decoration: none; font-weight: 600; }
+  /* 모바일 CTA도 버튼으로 (텍스트 링크는 눈에 안 띈다 — 2026-08-12 운영자 지적) */
+  .lgv2 .lg-hudcta { display: block; margin-top: 8px; padding: 10px;
+    background: #1c2b4a; color: #fff; border-radius: 9px; text-align: center;
+    text-decoration: none; font-size: 13px; font-weight: 600;
+    letter-spacing: -0.02em; }
   .lgv2 .lg-hud .lg-collect { padding: 9px 11px; font-size: 12.5px; }
   .lgv2 .lg-toast { position: fixed; left: 50%; bottom: 26px;
     transform: translateX(-50%); background: #1d1d1b; color: #fff;
@@ -272,6 +278,7 @@ export function getStaticPaths() {
       el.dataset.x = r.c[0];
       el.dataset.y = r.c[1];
       el.dataset.w = r.b[2];
+      el.dataset.chars = r.s.length;
       lbls.appendChild(el);
       sggEls.push(el);
     }
@@ -299,9 +306,12 @@ export function getStaticPaths() {
       placeLabel(el, rc, offX, offY);
     }
     for (const el of sggEls) {
-      // 전국 축척(광역 라벨이 떠 있는 동안)에는 숨기고, 확대해서 그 지역이
-      // 화면에서 충분히 커졌을 때만 등장 (문턱 58px는 전국 화면이 글자로 덮였다)
-      if (sidoOn || (+el.dataset.w / scale) <= 110) { el.style.display = 'none'; continue; }
+      // 전국 축척(광역 라벨이 떠 있는 동안)에는 숨긴다.
+      // 등장 문턱은 **그 라벨이 실제로 차지할 폭** 기준 — 고정 픽셀로 재면
+      // 글자 수가 다른 지역이 같은 배율에서 갈린다(영등포구는 숨고 양천구는
+      // 보이던 문제, 2026-08-12 운영자 실기기 지적).
+      const needPx = +el.dataset.chars * 11 + 10;   // 11px 글자 폭 + 여백
+      if (sidoOn || (+el.dataset.w / scale) <= needPx) { el.style.display = 'none'; continue; }
       placeLabel(el, rc, offX, offY);
     }
   }
@@ -483,7 +493,7 @@ export function getStaticPaths() {
     return `<button class="lg-x" aria-label="닫기">✕</button>
       <div class="lg-hudhead"><b>${r.n}</b><span>최근 30일 · 종합 — 웨더리그 점수</span></div>
       ${rowsHTML(g, true)}
-      <a class="lg-hudcta" href="#" data-demo>우리 동네 전체 순위와 예보 받기 →</a>`;
+      <a class="lg-hudcta" href="#" data-demo>우리 동네 전체 순위와 예보 받기</a>`;
   }
 
   const card = $('lgCard');
