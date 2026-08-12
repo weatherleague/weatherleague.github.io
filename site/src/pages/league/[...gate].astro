@@ -1,13 +1,16 @@
 ---
-// 리그 현황 탭 — 시제품 v3 (2026-08-11, 미리보기 전용)
+// 예보 순위 — 전국 리그 / 지역 리그 (2026-08-13 디자인 정리판)
 //
 // ⚠ 이 페이지는 **미리보기 빌드에서만 생성된다** (아래 getStaticPaths 게이트).
 //   본 사이트 공개 게이트 = "v4 종합순위 공개 가능 상태" (BACKLOG 웹 트랙 ③).
 //   데이터는 전부 데모(고정 시드 더미) — 실제 순위를 싣지 않는다.
-// v3 개정 (운영자 실기기 피드백 2026-08-11 밤):
-//   바텀시트 폐기 → 지도 하단 얇은 HUD 카드 / 줌 레벨별 지명 라벨 /
-//   Top3 색 네모 → 앱과 같은 국기·채널 아이콘(이모지 금지 원칙 동일) /
-//   UI 이모지 → 벡터 아이콘 / 내 위치 = 정확도 표시 + 낮으면 자동 선택 안 함
+//
+// 2026-08-13 개정 (운영자 디자인 피드백):
+//   · 색 체계를 **사이트 브랜드 토큰**(global.css)으로 통일 — 종전의 베이지·회색
+//     계열이 랜딩/앱과 따로 놀던 것이 "촌스럽다"의 근본 원인이었다.
+//   · 외곽선 걷어내고 배경·그림자·여백으로 위계 (앱의 방향과 동일)
+//   · 카피는 질문형·설명형을 버리고 정보형으로
+//   · 지역 리그의 채널 패널을 브랜드 네이비 블록으로 (화면 중심 확보)
 // 자산 생성기: 비공개 저장소 pipeline/build_league_map_assets.py
 import Base from '../../layouts/Base.astro';
 import LeagueMapSvg from '../../components/LeagueMapSvg.astro';
@@ -21,97 +24,104 @@ export function getStaticPaths() {
 ---
 
 <Base
-  title="예보 순위 (개발 중) — 웨더리그"
-  description="전국 예보 순위와 우리 동네 1위 날씨 채널을 한눈에."
+  title="예보 순위 — 웨더리그"
+  description="국내외 기상 모델의 예보 성적을 전국·지역별로 비교해 보세요."
   path="/league/"
 >
   <main class="lgv2">
     <div class="container">
-      <h1>예보 순위</h1>
-      <p class="lg-note">
-        시제품 v4 — <b>화면의 순위·점수는 전부 데모(무작위)입니다.</b>
-        실제 값은 새 채점 체계가 준비되면 연결됩니다.
-      </p>
+      <header class="lg-head">
+        <h1>예보 순위</h1>
+        <p class="lg-lede">국내외 기상 모델의 예보 성적을 전국·지역별로 비교해 보세요.</p>
+      </header>
 
       <div class="lg-tabs" role="tablist" aria-label="보기 전환">
         <button id="tabNat" class="lg-tab on" type="button" role="tab"
-                aria-selected="true" aria-controls="secNat">전국 순위</button>
+                aria-selected="true" aria-controls="secNat">전국 리그</button>
         <button id="tabMap" class="lg-tab" type="button" role="tab"
-                aria-selected="false" aria-controls="secMap">우리 동네 지도</button>
+                aria-selected="false" aria-controls="secMap">지역 리그</button>
       </div>
 
       <section id="secNat" class="lg-sec" role="tabpanel" aria-labelledby="tabNat">
-        <h2 class="lg-h2">전국에서 요즘 누가 잘 맞히고 있나요?</h2>
-        <p class="lg-sub">최근 30일 · 전국 평균 웨더리그 점수</p>
+        <div class="lg-sechead">
+          <h2>전국 예보 순위</h2>
+          <p>최근 30일 · 웨더리그 점수 기준</p>
+        </div>
         <div id="natTop" class="lg-podium"></div>
 
-        <div class="lg-chartcard">
-          <div class="lg-charthead">
-            <h3>순위 변화</h3>
-            <p>최근 30일 · 위로 갈수록 높은 순위</p>
-          </div>
+        <div class="lg-panel">
+          <h3 class="lg-panel-title">순위 변화</h3>
           <div id="natChart" class="lg-chartwrap"></div>
-          <div id="natLegend" class="lg-legend"></div>
-          <details class="lg-table">
-            <summary>표로 보기</summary>
-            <div id="natTable"></div>
-          </details>
+        </div>
+
+        <div class="lg-panel">
+          <h3 class="lg-panel-title">전체 순위</h3>
+          <div id="natTable"></div>
         </div>
       </section>
 
       <section id="secMap" class="lg-sec" role="tabpanel" aria-labelledby="tabMap" hidden>
-        <h2 class="lg-h2">우리 동네에서는 누가 1위일까요?</h2>
-        <p class="lg-sub">지역을 눌러 1~3위를 확인하세요</p>
-
-      <div class="lg-toolbar">
-        <div class="lg-search">
-          <svg class="lg-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/>
-          </svg>
-          <input id="lgQ" type="search" placeholder="시·군·구 검색 (예: 마포)"
-                 autocomplete="off" aria-label="시군구 검색" />
-          <div id="lgQList" class="lg-qlist" hidden></div>
+        <div class="lg-sechead">
+          <h2>지역별 예보 순위</h2>
+          <p>지역을 선택하면 상위 3개 채널을 볼 수 있습니다</p>
         </div>
-        <button id="lgLoc" class="lg-btn lg-btn--primary" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10Z"/>
-            <circle cx="12" cy="11" r="2.4"/>
-          </svg>
-          내 동네 보기
-        </button>
-      </div>
 
-      <div class="lg-board">
-      <div class="lg-rail" id="lgRail" role="group" aria-label="채널 선택"></div>
-      <div class="lg-mapwrap" id="lgWrap">
-        <LeagueMapSvg />
-        <div id="lgLbls" class="lg-lbls" aria-hidden="true"></div>
-        <div class="lg-zoom">
-          <button id="lgZin" class="lg-btn lg-sq" type="button" aria-label="확대">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                 stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
-          <button id="lgZout" class="lg-btn lg-sq" type="button" aria-label="축소">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                 stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
-          </button>
-          <button id="lgZfit" class="lg-btn lg-sq" type="button" aria-label="전국 보기">
+        <div class="lg-controls">
+          <div class="lg-search">
+            <svg class="lg-search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/>
+            </svg>
+            <input id="lgQ" type="search" placeholder="지역명을 입력하세요 (예: 강남구, 해운대구)"
+                   autocomplete="off" aria-label="지역 검색" />
+            <div id="lgQList" class="lg-qlist" hidden></div>
+          </div>
+          <button id="lgLoc" class="lg-cta-btn" type="button"
+                  title="위치 정보는 브라우저 안에서만 사용하며 서버로 보내지 않습니다">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/>
+              <path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10Z"/>
+              <circle cx="12" cy="11" r="2.4"/>
             </svg>
+            우리 동네 보기
           </button>
         </div>
-        <div id="lgTip" class="lg-tip" hidden></div>
-        <div id="lgCard" class="lg-card" hidden></div>
-        <div id="lgHud" class="lg-hud" hidden></div>
-      </div>
-      </div>
-      <p class="lg-caption"><span id="lgCapLead">채널을 고르면 그 채널이 1위인 지역이
-        떠올라요</span> · 지역을 누르면 1~3위를 볼 수 있어요 ·
-        내 위치는 브라우저 안에서만 판정하며 좌표를 서버로 보내지 않아요.</p>
+
+        <div class="lg-board">
+          <div class="lg-rail" id="lgRail" role="group" aria-label="채널 선택"></div>
+          <div class="lg-mapwrap" id="lgWrap">
+            <LeagueMapSvg />
+            <div id="lgLbls" class="lg-lbls" aria-hidden="true"></div>
+            <div class="lg-zoom">
+              <button id="lgZin" class="lg-mapbtn" type="button" aria-label="확대" title="확대">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <button id="lgZout" class="lg-mapbtn" type="button" aria-label="축소" title="축소">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+              </button>
+              <button id="lgZfit" class="lg-mapbtn" type="button" aria-label="전국 보기"
+                      title="전국 보기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/>
+                </svg>
+              </button>
+              <button id="lgHere" class="lg-mapbtn" type="button" aria-label="현재 위치"
+                      title="현재 위치">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4.2"/>
+                  <path d="M12 2.6v3.2M12 18.2v3.2M2.6 12h3.2M18.2 12h3.2"/>
+                </svg>
+              </button>
+            </div>
+            <div id="lgTip" class="lg-tip" hidden></div>
+            <div id="lgCard" class="lg-card" hidden></div>
+            <div id="lgHud" class="lg-hud" hidden></div>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -120,245 +130,267 @@ export function getStaticPaths() {
 </Base>
 
 <style is:global>
-  .lgv2 { padding: 26px 0 70px; }
-  .lgv2 h1 { font-size: 24px; letter-spacing: -0.03em; }
-  .lgv2 .lg-note { color: #6d6c64; font-size: 14px; margin: 6px 0 16px; }
-  /* 탭 — 전국 순위 / 우리 동네 지도 */
-  .lgv2 .lg-tabs { display: flex; gap: 4px; background: #ecebe2; padding: 4px;
-    border-radius: 12px; margin-bottom: 18px; }
-  .lgv2 .lg-tab { flex: 1; border: 0; background: none; padding: 10px 14px;
-    border-radius: 9px; font: inherit; font-size: 14px; font-weight: 600;
-    color: #6d6c64; cursor: pointer; letter-spacing: -0.02em; }
-  .lgv2 .lg-tab.on { background: #fff; color: #1d1d1b;
-    box-shadow: 0 1px 3px rgba(0,0,0,.09); }
-  .lgv2 .lg-h2 { font-size: 19px; letter-spacing: -0.03em; }
-  .lgv2 .lg-sub { font-size: 13px; color: #8a897f; margin: 4px 0 14px; }
-  /* 전국 시상대 (1·2·3위) */
-  .lgv2 .lg-podium { display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 10px; margin-bottom: 20px; }
-  .lgv2 .lg-pod { background: #fff; border: 1px solid #e5e4db; border-radius: 13px;
-    padding: 14px; text-align: center; }
-  .lgv2 .lg-pod--1 { border-color: #1c2b4a; box-shadow: 0 3px 14px rgba(28,43,74,.13); }
-  .lgv2 .lg-pod .rk { display: inline-block; font-size: 11.5px; font-weight: 700;
-    color: #6d6c64; background: #ecebe2; border-radius: 6px; padding: 2px 8px; }
-  .lgv2 .lg-pod--1 .rk { background: #1c2b4a; color: #fff; }
-  .lgv2 .lg-pod .ic { display: block; margin: 9px auto 6px; }
-  .lgv2 .lg-pod .nm { font-size: 14.5px; font-weight: 700; letter-spacing: -0.02em;
-    line-height: 1.35; }
-  .lgv2 .lg-pod .sc { font-size: 27px; font-weight: 700; margin-top: 3px;
-    font-variant-numeric: tabular-nums; }
-  .lgv2 .lg-pod .sc small { font-size: 11px; font-weight: 400; color: #8a897f;
-    display: block; margin-top: 1px; }
-  /* 차트 */
-  .lgv2 .lg-chartcard { background: #fff; border: 1px solid #e5e4db;
-    border-radius: 14px; padding: 18px; }
-  .lgv2 .lg-charthead h3 { font-size: 15px; letter-spacing: -0.02em; }
-  .lgv2 .lg-charthead p { font-size: 12px; color: #8a897f; margin: 3px 0 12px; }
+  /* 색은 전부 사이트 브랜드 토큰(global.css)을 쓴다 — 랜딩·앱과 같은 계열 유지 */
+  .lgv2 { padding: 30px 0 80px; }
+  .lgv2 .lg-head { margin-bottom: 20px; }
+  .lgv2 .lg-head h1 { font-size: 30px; letter-spacing: -0.04em; color: var(--ink);
+    margin: 0; }
+  .lgv2 .lg-lede { color: var(--muted); font-size: 15px; margin: 8px 0 0; }
+
+  /* ── 탭 — 브랜드 네이비 채움으로 선택 상태를 분명히 ── */
+  .lgv2 .lg-tabs { display: inline-flex; gap: 4px; background: var(--bg-soft);
+    padding: 5px; border-radius: 14px; margin-bottom: 26px; }
+  .lgv2 .lg-tab { border: 0; background: none; padding: 10px 22px; border-radius: 10px;
+    font: inherit; font-size: 15px; font-weight: 600; color: var(--sub);
+    cursor: pointer; letter-spacing: -0.03em; transition: background .18s, color .18s; }
+  .lgv2 .lg-tab:hover { color: var(--ink); }
+  .lgv2 .lg-tab.on { background: var(--deep); color: #fff;
+    box-shadow: 0 4px 14px rgba(20, 42, 93, .22); }
+
+  .lgv2 .lg-sechead { margin-bottom: 16px; }
+  .lgv2 .lg-sechead h2 { font-size: 21px; letter-spacing: -0.035em; color: var(--ink);
+    margin: 0; }
+  .lgv2 .lg-sechead p { font-size: 14px; color: var(--muted); margin: 5px 0 0; }
+
+  /* ── 카드·패널: 외곽선 없이 배경·그림자로 위계 ── */
+  .lgv2 .lg-panel { background: #fff; border-radius: 18px; padding: 22px;
+    box-shadow: 0 2px 10px rgba(22, 48, 79, .05), 0 12px 30px rgba(22, 48, 79, .05);
+    margin-top: 18px; }
+  .lgv2 .lg-panel-title { font-size: 16px; letter-spacing: -0.03em; color: var(--ink);
+    margin: 0 0 14px; }
+
+  /* ── 전국 시상대 ── */
+  .lgv2 .lg-podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .lgv2 .lg-pod { background: var(--bg-soft); border-radius: 18px; padding: 20px 16px;
+    text-align: center; }
+  .lgv2 .lg-pod--1 { background: var(--deep); color: #fff;
+    box-shadow: 0 10px 26px rgba(20, 42, 93, .24); }
+  .lgv2 .lg-pod .rk { display: inline-block; font-size: 12px; font-weight: 700;
+    color: var(--sub); background: rgba(22, 48, 79, .07); border-radius: 7px;
+    padding: 3px 10px; letter-spacing: -0.02em; }
+  .lgv2 .lg-pod--1 .rk { background: var(--gold); color: #1a1405; }
+  .lgv2 .lg-pod .ic { display: block; margin: 13px auto 8px; }
+  .lgv2 .lg-pod .nm { font-size: 15px; font-weight: 700; letter-spacing: -0.03em; }
+  .lgv2 .lg-pod .sc { font-size: 30px; font-weight: 800; margin-top: 6px;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }
+  .lgv2 .lg-pod .unit { font-size: 12px; font-weight: 500; color: var(--muted);
+    display: block; margin-top: 2px; }
+  .lgv2 .lg-pod--1 .unit { color: rgba(255, 255, 255, .62); }
+
+  /* ── 차트 ── */
   .lgv2 .lg-chartwrap { position: relative; }
   .lgv2 .lg-chartwrap svg { display: block; width: 100%; height: auto; }
-  .lgv2 .lg-chartwrap .grid { stroke: #eeede6; stroke-width: 1; }
-  .lgv2 .lg-chartwrap .axis { font-size: 10.5px; fill: #8a897f; }
-  .lgv2 .lg-chartwrap .ln { fill: none; stroke-width: 2; stroke-linejoin: round;
+  .lgv2 .lg-chartwrap .grid { stroke: rgba(22, 48, 79, .08); stroke-width: 1; }
+  .lgv2 .lg-chartwrap .axis { font-size: 11px; fill: var(--muted); }
+  .lgv2 .lg-chartwrap .ln { fill: none; stroke-width: 2.2; stroke-linejoin: round;
     stroke-linecap: round; }
-  .lgv2 .lg-chartwrap .ln--mut { stroke: #d6d5cc; stroke-width: 1.2; }
+  .lgv2 .lg-chartwrap .ln--sub { stroke-width: 1.3; opacity: .38; }
   .lgv2 .lg-chartwrap .dot { stroke: #fff; stroke-width: 2; }
-  .lgv2 .lg-chartwrap .cross { stroke: #b6b5ab; stroke-width: 1; stroke-dasharray: 3 3; }
+  .lgv2 .lg-chartwrap .cross { stroke: rgba(22, 48, 79, .28); stroke-width: 1;
+    stroke-dasharray: 3 3; }
+  .lgv2 .lg-chartwrap .endlbl { font-size: 11.5px; font-weight: 600;
+    letter-spacing: -0.03em; }
+  .lgv2 .lg-chartwrap .endlbl--sub { font-size: 11px; font-weight: 500; opacity: .72; }
   .lgv2 .lg-cttip { position: absolute; pointer-events: none; background: #fff;
-    border: 1px solid #e0dfd6; border-radius: 10px; padding: 9px 11px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.13); font-size: 12.5px; min-width: 168px; }
-  .lgv2 .lg-cttip .dt { font-size: 11px; color: #8a897f; margin-bottom: 5px; }
-  .lgv2 .lg-cttip .r { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
-  .lgv2 .lg-cttip .r .rk { width: 22px; color: #8a897f; font-size: 11px; }
-  .lgv2 .lg-cttip .r .nm { flex: 1; letter-spacing: -0.02em; }
+    border-radius: 12px; padding: 11px 13px; font-size: 13px; min-width: 178px;
+    box-shadow: 0 6px 28px rgba(22, 48, 79, .18); }
+  .lgv2 .lg-cttip .dt { font-size: 11.5px; color: var(--muted); margin-bottom: 6px; }
+  .lgv2 .lg-cttip .r { display: flex; align-items: center; gap: 7px; padding: 3px 0; }
+  .lgv2 .lg-cttip .r .rk { width: 24px; color: var(--muted); font-size: 11.5px; }
+  .lgv2 .lg-cttip .r .nm { flex: 1; letter-spacing: -0.03em; }
   .lgv2 .lg-cttip .r .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .lgv2 .lg-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px;
-    font-size: 12.5px; color: #45443f; }
-  .lgv2 .lg-legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .lgv2 .lg-legend i { width: 14px; height: 3px; border-radius: 2px; }
-  .lgv2 .lg-table { margin-top: 14px; font-size: 13px; }
-  .lgv2 .lg-table summary { cursor: pointer; color: #6d6c64; font-size: 12.5px; }
-  .lgv2 .lg-table table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  .lgv2 .lg-table th, .lgv2 .lg-table td { text-align: left; padding: 7px 6px;
-    border-bottom: 1px solid #f0efe8; }
-  .lgv2 .lg-table th { font-size: 11.5px; color: #8a897f; font-weight: 600; }
-  .lgv2 .lg-table td.num { text-align: right; font-variant-numeric: tabular-nums;
-    font-weight: 600; }
-  @media (max-width: 560px) {
-    .lgv2 .lg-podium { grid-template-columns: 1fr; }
-    .lgv2 .lg-pod { display: flex; align-items: center; gap: 10px; text-align: left; }
-    .lgv2 .lg-pod .ic { margin: 0; }
-    .lgv2 .lg-pod .nm { flex: 1; }
-    .lgv2 .lg-pod .sc { font-size: 20px; margin-top: 0; }
-    .lgv2 .lg-pod .sc small { display: inline; margin-left: 3px; }
-  }
-  .lgv2 .lg-toolbar { display: flex; gap: 10px; align-items: center;
-    flex-wrap: wrap; margin-bottom: 12px; }
-  .lgv2 .lg-search { position: relative; flex: 1 1 220px; max-width: 340px; }
-  .lgv2 .lg-search-ic { position: absolute; left: 12px; top: 50%; width: 16px;
-    height: 16px; transform: translateY(-50%); color: #8a897f; }
-  .lgv2 .lg-search input { width: 100%; padding: 10px 14px 10px 36px;
-    font-size: 15px; border: 1px solid #d9d8cf; border-radius: 10px;
-    background: #fff; font-family: inherit; }
-  .lgv2 .lg-qlist { position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-    background: #fff; border: 1px solid #d9d8cf; border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.09); z-index: 30; overflow: hidden; }
+
+  /* ── 표 (항상 펼쳐 둔다) ── */
+  .lgv2 .lg-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .lgv2 .lg-tbl th { font-size: 12px; color: var(--muted); font-weight: 600;
+    text-align: left; padding: 0 10px 10px; }
+  .lgv2 .lg-tbl th.num, .lgv2 .lg-tbl td.num { text-align: right; }
+  .lgv2 .lg-tbl td { padding: 11px 10px; border-top: 1px solid rgba(22, 48, 79, .07); }
+  .lgv2 .lg-tbl tr:first-child td { border-top: 0; }
+  .lgv2 .lg-tbl .ch { display: flex; align-items: center; gap: 9px;
+    letter-spacing: -0.03em; }
+  .lgv2 .lg-tbl .rk { color: var(--muted); font-variant-numeric: tabular-nums;
+    width: 34px; }
+  .lgv2 .lg-tbl tr.top td .rk { color: var(--ink); font-weight: 700; }
+  .lgv2 .lg-tbl .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lgv2 .lg-tbl .dl { font-variant-numeric: tabular-nums; font-size: 13px; }
+  .lgv2 .lg-tbl .dl--up { color: var(--green); }
+  .lgv2 .lg-tbl .dl--dn { color: var(--red); }
+  .lgv2 .lg-tbl .dl--same { color: var(--muted); }
+
+  /* ── 지역 리그: 상단 컨트롤 바 ── */
+  .lgv2 .lg-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+  .lgv2 .lg-search { position: relative; flex: 1; }
+  .lgv2 .lg-search-ic { position: absolute; left: 16px; top: 50%; width: 18px;
+    height: 18px; transform: translateY(-50%); color: var(--muted); }
+  .lgv2 .lg-search input { width: 100%; padding: 15px 18px 15px 44px; font-size: 15px;
+    border: 0; border-radius: 14px; background: var(--bg-soft); font-family: inherit;
+    color: var(--ink); letter-spacing: -0.03em; }
+  .lgv2 .lg-search input::placeholder { color: var(--muted); }
+  .lgv2 .lg-search input:focus { outline: 2px solid var(--blue); outline-offset: -2px;
+    background: #fff; }
+  .lgv2 .lg-qlist { position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #fff; border-radius: 14px; z-index: 30; overflow: hidden;
+    box-shadow: 0 10px 34px rgba(22, 48, 79, .16); }
   .lgv2 .lg-qlist button { display: block; width: 100%; text-align: left;
-    padding: 10px 14px; border: 0; background: none; font: inherit;
-    font-size: 14px; cursor: pointer; }
-  .lgv2 .lg-qlist button:hover { background: #f4f3ec; }
-  .lgv2 .lg-btn { display: inline-flex; align-items: center; gap: 6px;
-    padding: 10px 14px; font-size: 14px; font-family: inherit;
-    border: 1px solid #d9d8cf; border-radius: 10px; background: #fff;
-    cursor: pointer; color: #1d1d1b; }
-  .lgv2 .lg-btn svg { width: 16px; height: 16px; }
-  .lgv2 .lg-btn:hover { background: #f4f3ec; }
-  .lgv2 .lg-btn[disabled] { opacity: .5; cursor: wait; }
-  /* "내 동네 보기"는 이 화면의 핵심 동선 — 검색과 같은 급의 보조 버튼이 아니다 */
-  .lgv2 .lg-btn--primary { background: #1c2b4a; color: #fff;
-    border-color: #1c2b4a; font-weight: 700; padding: 11px 18px; font-size: 14.5px;
-    box-shadow: 0 2px 8px rgba(28,43,74,.22); }
-  .lgv2 .lg-btn--primary svg { width: 18px; height: 18px; }
-  .lgv2 .lg-btn--primary:hover { background: #26375e; }
-  /* 배경 = 바다. 목적은 "바다는 파랗다"가 아니라 **육지를 돋보이게 하는 것** —
-     탁한 청회색은 화면 전체를 눌렀다(2026-08-12 저녁 재조정). 거의 흰빛 하늘색으로. */
-  /* 채널 목록 + 지도 (넓은 화면 = 왼쪽 목록 / 좁은 화면 = 지도 위 가로 스크롤) */
-  .lgv2 .lg-board { display: flex; gap: 14px; align-items: flex-start; }
-  .lgv2 .lg-rail { flex: 0 0 202px; display: flex; flex-direction: column; gap: 4px;
-    background: #fff; border: 1px solid #e5e4db; border-radius: 14px; padding: 8px; }
-  .lgv2 .lg-rail button { display: flex; align-items: center; gap: 8px; width: 100%;
-    padding: 8px 9px; border: 0; background: none; border-radius: 9px; font: inherit;
-    font-size: 13px; color: #45443f; cursor: pointer; text-align: left;
-    letter-spacing: -0.02em; }
-  .lgv2 .lg-rail button:hover { background: #f4f3ec; }
-  .lgv2 .lg-rail button.on { background: #1c2b4a; color: #fff; font-weight: 600; }
+    padding: 12px 18px; border: 0; background: none; font: inherit; font-size: 14.5px;
+    color: var(--ink); cursor: pointer; letter-spacing: -0.03em; }
+  .lgv2 .lg-qlist button:hover { background: var(--bg-soft); }
+  .lgv2 .lg-cta-btn { display: inline-flex; align-items: center; gap: 8px; border: 0;
+    padding: 15px 24px; border-radius: 14px; background: var(--deep); color: #fff;
+    font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+    letter-spacing: -0.03em; white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(20, 42, 93, .24); transition: background .18s; }
+  .lgv2 .lg-cta-btn:hover { background: var(--brand); }
+  .lgv2 .lg-cta-btn[disabled] { opacity: .55; cursor: wait; }
+  .lgv2 .lg-cta-btn svg { width: 18px; height: 18px; }
+
+  /* ── 채널 패널(네이비 블록) + 지도 ── */
+  .lgv2 .lg-board { display: flex; gap: 10px; align-items: stretch; }
+  .lgv2 .lg-rail { flex: 0 0 208px; display: flex; flex-direction: column; gap: 2px;
+    background: var(--deep); border-radius: 18px; padding: 10px;
+    box-shadow: 0 10px 30px rgba(20, 42, 93, .18); }
+  .lgv2 .lg-rail button { display: flex; align-items: center; gap: 9px; width: 100%;
+    padding: 9px 11px; border: 0; background: none; border-radius: 11px; font: inherit;
+    font-size: 13.5px; color: rgba(255, 255, 255, .82); cursor: pointer;
+    text-align: left; letter-spacing: -0.03em; transition: background .16s, color .16s; }
+  .lgv2 .lg-rail button:hover { background: rgba(255, 255, 255, .10); color: #fff; }
+  .lgv2 .lg-rail button.on { background: #fff; color: var(--ink); font-weight: 700;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .18); }
   .lgv2 .lg-rail .nm { flex: 1; white-space: nowrap; overflow: hidden;
     text-overflow: ellipsis; }
-  .lgv2 .lg-rail .ct { font-size: 11.5px; color: #8a897f; font-variant-numeric: tabular-nums; }
-  .lgv2 .lg-rail button.on .ct { color: rgba(255,255,255,.75); }
-  /* 주변국 윤곽 — 배경 장식. 클릭 대상이 아니다 */
-  .lgv2 #lgNeighbors path { fill: #e2e8ee; stroke: #cfd8e1; stroke-width: .8;
-    vector-effect: non-scaling-stroke; pointer-events: none; }
-  .lgv2 .lg-mapwrap { position: relative; background: #eef6fc; margin: 0 auto;
-    border: 1px solid #dde7ef; border-radius: 14px; overflow: hidden; flex: 1;
-    min-width: 0; }
-  @media (max-width: 768px) {
-    .lgv2 .lg-board { flex-direction: column; gap: 10px; }
-    .lgv2 .lg-rail { flex: none; width: 100%; flex-direction: row; overflow-x: auto;
-      padding: 7px; gap: 6px; scrollbar-width: none; }
-    .lgv2 .lg-rail::-webkit-scrollbar { display: none; }
-    .lgv2 .lg-rail button { width: auto; flex: none; padding: 7px 10px; }
-    .lgv2 .lg-rail .ct { display: none; }
-    .lgv2 .lg-mapwrap { width: 100%; }
-  }
+  .lgv2 .lg-rail .ct { font-size: 12px; color: rgba(255, 255, 255, .48);
+    font-variant-numeric: tabular-nums; }
+  .lgv2 .lg-rail button.on .ct { color: var(--muted); }
+
+  .lgv2 .lg-mapwrap { position: relative; background: #eef4fa; border-radius: 18px;
+    overflow: hidden; flex: 1; min-width: 0; }
   .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none; }
-  /* 경계선 3단 위계 (2026-08-12 저녁 재설계).
-     ⚠ 종전의 **흰색** 시군구 선이 "색 위에 막을 씌운" 인상의 주범이었다 —
-     전국 축척에서 250개 지역에 두른 흰 선이 각 면적의 큰 몫을 먹어 색에 흰색이
-     섞인다. 그래서 어두운 반투명 실선으로 바꾼다(색을 흐리지 않고 구분만 준다).
-     vector-effect: 줌 배율과 무관하게 화면 픽셀 굵기 유지 */
-  .lgv2 #lgMap path { stroke: rgba(23,32,45,.26); stroke-width: .7; cursor: pointer;
-    vector-effect: non-scaling-stroke; }
-  /* 선택 = 색을 더 진하게 칠하는 대신 **그 면만 들어올린다** (흰 테두리 + 그림자).
-     색 대비로 알리면 지도가 시끄러워진다 — 운영자 제안 2026-08-12 */
-  .lgv2 #lgMap path.sel { stroke: #fff; stroke-width: 1.8;
-    filter: drop-shadow(0 3px 5px rgba(15,23,42,.45)); }
-  /* 육지 전체에 아주 옅은 그림자 — 바다 위에 놓인 판처럼 보이게 */
-  .lgv2 #lgRegions { filter: drop-shadow(0 1px 1.5px rgba(30,50,80,.16)); }
-  /* 고른 채널이 1위인 지역 — 살짝 떠오른다 */
-  .lgv2 #lgMap path.won { stroke: rgba(255,255,255,.9); stroke-width: 1.2;
-    filter: drop-shadow(0 3px 6px rgba(15,23,42,.45)); }
-  /* 시도(광역) = 시군구보다 "조금 더" 강할 뿐 — 극단적 대비 금지 */
-  .lgv2 #lgSidoLines path { fill: none; stroke: #334155; stroke-width: 1.5;
-    opacity: .9; pointer-events: none; vector-effect: non-scaling-stroke;
-    stroke-linejoin: round; }
-  @media (min-width: 769px) {
-    .lgv2 #lgSidoLines path { stroke-width: 1.8; }
+  /* 경계선 3단 위계 — 굵기를 전반적으로 낮춰 정제된 인상으로 (2026-08-13) */
+  .lgv2 #lgMap path { stroke: rgba(22, 48, 79, .20); stroke-width: .55; cursor: pointer;
+    vector-effect: non-scaling-stroke; transform-box: fill-box; transform-origin: 50% 50%;
+    transition: fill .2s ease, filter .2s ease, transform .2s cubic-bezier(.2,.7,.3,1); }
+  .lgv2 #lgMap path.sel { stroke: #fff; stroke-width: 1.4;
+    filter: drop-shadow(0 3px 6px rgba(20, 42, 93, .4)); }
+  .lgv2 #lgSidoLines path { fill: none; stroke: rgba(22, 48, 79, .42); stroke-width: .9;
+    pointer-events: none; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .lgv2 #lgNeighbors path { fill: #e3eaf2; stroke: rgba(22, 48, 79, .10);
+    stroke-width: .6; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .lgv2 #lgRegions { filter: drop-shadow(0 1px 1.5px rgba(22, 48, 79, .14)); }
+  /* 고른 채널이 1위인 지역 — 부드럽게 떠오른다 */
+  .lgv2 #lgMap path.won { stroke: rgba(255, 255, 255, .92); stroke-width: 1;
+    transform: translateY(-2px) scale(1.02);
+    filter: drop-shadow(0 4px 7px rgba(20, 42, 93, .42)); }
+  @media (prefers-reduced-motion: reduce) {
+    .lgv2 #lgMap path { transition: none; }
+    .lgv2 #lgMap path.won { transform: none; }
   }
-  /* 지명 라벨 — SVG 밖 HTML 오버레이 (SVG 텍스트는 확대 시 폰 GPU가 글자를
-     뭉갠다, 2026-08-12 실기기 피드백). 위치는 JS가 매 프레임 화면 좌표로 환산 */
-  .lgv2 .lg-lbls { position: absolute; inset: 0; pointer-events: none;
-    z-index: 5; overflow: hidden; }
+
+  /* 지명 라벨 — SVG 밖 HTML 오버레이 (확대해도 글자가 또렷하다) */
+  .lgv2 .lg-lbls { position: absolute; inset: 0; pointer-events: none; z-index: 5;
+    overflow: hidden; }
   .lgv2 .lg-lbl { position: absolute; left: 0; top: 0; white-space: nowrap;
-    font-size: 11px; font-weight: 600; color: #1f1f1c; letter-spacing: -0.02em;
+    font-size: 11px; font-weight: 600; color: var(--ink); letter-spacing: -0.03em;
     text-shadow: 0 1px 2.5px #fff, 0 -1px 2.5px #fff, 1px 0 2.5px #fff,
-      -1px 0 2.5px #fff, 0 0 4px #fff;
-    will-change: transform; }
-  /* 광역 라벨 — 색칠된 면 위에서도 또렷하도록 반투명 흰 알약 배경 */
-  .lgv2 .lg-lbl--sido { font-size: 13px; font-weight: 700; padding: 2px 7px;
-    border-radius: 7px; background: rgba(255,255,255,.82); text-shadow: none;
-    box-shadow: 0 1px 3px rgba(15,23,42,.10); }
+      -1px 0 2.5px #fff, 0 0 4px #fff; will-change: transform; }
+  .lgv2 .lg-lbl--sido { font-size: 12.5px; font-weight: 700; padding: 2px 8px;
+    border-radius: 8px; background: rgba(255, 255, 255, .84); text-shadow: none;
+    box-shadow: 0 1px 4px rgba(22, 48, 79, .10); }
+
   .lgv2 .lg-zoom { position: absolute; right: 12px; top: 12px; display: flex;
     flex-direction: column; gap: 6px; }
-  .lgv2 .lg-sq { width: 40px; height: 40px; padding: 0; justify-content: center;
-    box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  .lgv2 .lg-sq svg { width: 17px; height: 17px; }
-  .lgv2 .lg-tip { position: absolute; pointer-events: none; background: #1d1d1b;
-    color: #fff; font-size: 12.5px; padding: 5px 9px; border-radius: 7px;
-    z-index: 20; white-space: nowrap; }
-  .lgv2 .lg-flag { width: 18px; height: 13px; object-fit: cover;
-    border-radius: 2.5px; box-shadow: 0 0 0 1px rgba(0,0,0,.10); flex: none; }
-  .lgv2 .lg-flag--sq { width: 15px; height: 15px; object-fit: contain;
-    border-radius: 0; box-shadow: none; }
-  .lgv2 .lg-card { position: absolute; z-index: 25; width: 256px; background: #fff;
-    border: 1px solid #e0dfd6; border-radius: 13px; padding: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.14); }
+  .lgv2 .lg-mapbtn { width: 40px; height: 40px; display: inline-flex;
+    align-items: center; justify-content: center; border: 0; border-radius: 12px;
+    background: rgba(255, 255, 255, .94); color: var(--ink); cursor: pointer;
+    box-shadow: 0 2px 10px rgba(22, 48, 79, .16); transition: background .16s; }
+  .lgv2 .lg-mapbtn:hover { background: #fff; }
+  .lgv2 .lg-mapbtn svg { width: 18px; height: 18px; }
+
+  .lgv2 .lg-tip { position: absolute; pointer-events: none; background: var(--ink);
+    color: #fff; font-size: 12.5px; padding: 6px 10px; border-radius: 8px; z-index: 20;
+    white-space: nowrap; letter-spacing: -0.03em; }
+
+  /* ── 지역 결과 카드 ── */
+  .lgv2 .lg-flag { width: 19px; height: 13px; object-fit: cover; border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(22, 48, 79, .12); flex: none; }
+  .lgv2 .lg-flag--sq { width: 16px; height: 16px; object-fit: contain; border-radius: 0;
+    box-shadow: none; }
+  .lgv2 .lg-card { position: absolute; z-index: 25; width: 262px; background: #fff;
+    border-radius: 16px; padding: 16px; box-shadow: 0 12px 40px rgba(22, 48, 79, .22); }
   .lgv2 .lg-cardhead { display: flex; align-items: baseline; gap: 8px;
-    margin-bottom: 10px; padding-right: 20px; }
-  .lgv2 .lg-cardhead b { font-size: 15px; letter-spacing: -0.02em; }
-  .lgv2 .lg-cardhead span { font-size: 11.5px; color: #8a897f; flex: none; }
-  .lgv2 .lg-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px;
-    border: 0; background: none; font-size: 14px; color: #8a897f; cursor: pointer; }
-  .lgv2 .lg-row { display: flex; align-items: center; gap: 8px; padding: 7px 0;
-    font-size: 14px; }
-  .lgv2 .lg-row + .lg-row { border-top: 1px solid #f0efe8; }
-  .lgv2 .lg-rank { flex: none; width: 30px; height: 21px; border-radius: 6px;
-    font-size: 11.5px; font-weight: 700; display: inline-flex;
-    align-items: center; justify-content: center; background: #ecebe2;
-    color: #6d6c64; }
-  .lgv2 .lg-rank--top { background: #1c2b4a; color: #fff; }
-  .lgv2 .lg-row .nm { flex: 1; letter-spacing: -0.02em; }
+    margin-bottom: 12px; padding-right: 22px; }
+  .lgv2 .lg-cardhead b { font-size: 15.5px; letter-spacing: -0.035em; color: var(--ink); }
+  .lgv2 .lg-cardhead span { font-size: 11.5px; color: var(--muted); flex: none; }
+  .lgv2 .lg-x { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px;
+    border: 0; background: none; font-size: 14px; color: var(--muted); cursor: pointer;
+    border-radius: 8px; }
+  .lgv2 .lg-x:hover { background: var(--bg-soft); }
+  .lgv2 .lg-row { display: flex; align-items: center; gap: 9px; padding: 8px 0;
+    font-size: 14px; color: var(--ink); }
+  .lgv2 .lg-row + .lg-row { border-top: 1px solid rgba(22, 48, 79, .07); }
+  .lgv2 .lg-rank { flex: none; width: 30px; height: 21px; border-radius: 7px;
+    font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center;
+    justify-content: center; background: var(--bg-soft); color: var(--sub); }
+  .lgv2 .lg-rank--top { background: var(--gold); color: #1a1405; }
+  .lgv2 .lg-row .nm { flex: 1; letter-spacing: -0.03em; }
   .lgv2 .lg-row .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .lgv2 .lg-schead { font-size: 11px; color: #8a897f; text-align: right;
+  .lgv2 .lg-schead { font-size: 11.5px; color: var(--muted); text-align: right;
     margin-bottom: 2px; }
-  .lgv2 .lg-cta { display: block; text-align: center; margin-top: 11px;
-    padding: 11px; background: #1c2b4a; color: #fff; border-radius: 10px;
-    text-decoration: none; font-size: 13.5px; }
-  .lgv2 .lg-collect { background: #f7f6f1; border-radius: 10px; padding: 14px;
-    font-size: 13.5px; color: #45443f; line-height: 1.55; }
-  .lgv2 .lg-collect b { display: block; margin-bottom: 3px; }
-  .lgv2 .lg-caption { font-size: 12.5px; color: #8a897f; margin-top: 10px; }
-  /* 모바일: 바텀시트 대신 지도 하단 얇은 HUD 카드 (지도를 가리지 않게) */
-  .lgv2 .lg-hud { position: absolute; left: 10px; right: 10px; bottom: 10px;
-    z-index: 25; background: rgba(255,255,255,.96); border: 1px solid #e0dfd6;
-    border-radius: 12px; padding: 9px 12px; box-shadow: 0 6px 20px rgba(0,0,0,.14);
-    backdrop-filter: blur(4px); }
-  .lgv2 .lg-hudhead { display: flex; align-items: baseline; gap: 7px;
-    padding-right: 22px; margin-bottom: 4px; }
-  .lgv2 .lg-hudhead b { font-size: 13.5px; letter-spacing: -0.02em; }
-  .lgv2 .lg-hudhead span { font-size: 10.5px; color: #8a897f; }
-  .lgv2 .lg-hrow { display: flex; align-items: center; gap: 7px; padding: 4px 0;
-    font-size: 13px; }
-  .lgv2 .lg-hrow + .lg-hrow { border-top: 1px solid #f2f1ea; }
-  .lgv2 .lg-hrow .lg-rank { width: 27px; height: 18px; font-size: 10.5px;
-    border-radius: 5px; }
-  .lgv2 .lg-hrow .nm { flex: 1; letter-spacing: -0.02em; }
+  .lgv2 .lg-cta { display: block; text-align: center; margin-top: 13px; padding: 12px;
+    background: var(--deep); color: #fff; border-radius: 12px; text-decoration: none;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.03em; }
+  .lgv2 .lg-collect { background: var(--bg-soft); border-radius: 12px; padding: 14px;
+    font-size: 13.5px; color: var(--sub); line-height: 1.55; }
+  .lgv2 .lg-collect b { display: block; margin-bottom: 3px; color: var(--ink); }
+
+  /* 모바일: 지도 하단 얇은 HUD */
+  .lgv2 .lg-hud { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 25;
+    background: rgba(255, 255, 255, .97); border-radius: 15px; padding: 11px 13px;
+    box-shadow: 0 8px 26px rgba(22, 48, 79, .2); backdrop-filter: blur(4px); }
+  .lgv2 .lg-hudhead { display: flex; align-items: baseline; gap: 7px; padding-right: 24px;
+    margin-bottom: 5px; }
+  .lgv2 .lg-hudhead b { font-size: 14px; letter-spacing: -0.035em; color: var(--ink); }
+  .lgv2 .lg-hudhead span { font-size: 11px; color: var(--muted); }
+  .lgv2 .lg-hrow { display: flex; align-items: center; gap: 8px; padding: 5px 0;
+    font-size: 13.5px; color: var(--ink); }
+  .lgv2 .lg-hrow + .lg-hrow { border-top: 1px solid rgba(22, 48, 79, .06); }
+  .lgv2 .lg-hrow .lg-rank { width: 27px; height: 19px; font-size: 11px; border-radius: 6px; }
+  .lgv2 .lg-hrow .nm { flex: 1; letter-spacing: -0.03em; }
   .lgv2 .lg-hrow .sc { font-weight: 700; font-variant-numeric: tabular-nums; }
-  /* 모바일 CTA도 버튼으로 (텍스트 링크는 눈에 안 띈다 — 2026-08-12 운영자 지적) */
-  .lgv2 .lg-hudcta { display: block; margin-top: 8px; padding: 10px;
-    background: #1c2b4a; color: #fff; border-radius: 9px; text-align: center;
-    text-decoration: none; font-size: 13px; font-weight: 600;
-    letter-spacing: -0.02em; }
-  .lgv2 .lg-hud .lg-collect { padding: 9px 11px; font-size: 12.5px; }
-  .lgv2 .lg-toast { position: fixed; left: 50%; bottom: 26px;
-    transform: translateX(-50%); background: #1d1d1b; color: #fff;
-    font-size: 13.5px; padding: 10px 16px; border-radius: 10px; opacity: 0;
-    transition: opacity .15s; z-index: 70; pointer-events: none;
-    max-width: 92vw; text-align: center; }
+  .lgv2 .lg-hudcta { display: block; margin-top: 8px; padding: 11px; background: var(--deep);
+    color: #fff; border-radius: 11px; text-align: center; text-decoration: none;
+    font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em; }
+
+  .lgv2 .lg-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+    background: var(--ink); color: #fff; font-size: 13.5px; padding: 11px 18px;
+    border-radius: 12px; opacity: 0; transition: opacity .15s; z-index: 70;
+    pointer-events: none; max-width: 92vw; text-align: center; letter-spacing: -0.03em;
+    box-shadow: 0 10px 30px rgba(22, 48, 79, .3); }
   .lgv2 .lg-toast.on { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .lgv2 .lg-podium { grid-template-columns: 1fr; }
+    .lgv2 .lg-pod { display: flex; align-items: center; gap: 12px; text-align: left;
+      padding: 14px 16px; }
+    .lgv2 .lg-pod .ic { margin: 0; }
+    .lgv2 .lg-pod .nm { flex: 1; }
+    .lgv2 .lg-pod .sc { font-size: 22px; margin-top: 0; }
+    .lgv2 .lg-pod .unit { display: inline; margin-left: 4px; }
+  }
   @media (max-width: 768px) {
+    .lgv2 .lg-head h1 { font-size: 25px; }
+    .lgv2 .lg-tabs { display: flex; width: 100%; }
+    .lgv2 .lg-tab { flex: 1; padding: 10px 12px; }
+    .lgv2 .lg-controls { flex-direction: column; }
+    .lgv2 .lg-cta-btn { justify-content: center; }
+    .lgv2 .lg-board { flex-direction: column; gap: 10px; }
+    .lgv2 .lg-rail { flex: none; width: 100%; flex-direction: row; overflow-x: auto;
+      padding: 8px; gap: 6px; scrollbar-width: none; }
+    .lgv2 .lg-rail::-webkit-scrollbar { display: none; }
+    .lgv2 .lg-rail button { width: auto; flex: none; padding: 8px 12px; }
+    .lgv2 .lg-rail .ct { display: none; }
     .lgv2 .lg-card { display: none !important; }
-    .lgv2 .lg-demo-toggle { margin-left: 0; }
-    .lgv2 #lgMap { max-height: 72vh; }
+    .lgv2 .lg-panel { padding: 16px; }
   }
   @media (min-width: 769px) { .lgv2 .lg-hud { display: none !important; } }
 </style>
@@ -368,52 +400,37 @@ export function getStaticPaths() {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   const svg = document.getElementById('lgMap');
   const wrap = document.getElementById('lgWrap');
-  // FULL = SVG 전체 범위(섬 포함, 팬 한계 계산용) / VB = 첫 화면 틀(본토 중심).
-  // 본토가 화면을 더 채우도록 울릉군을 뺀 범위를 기본으로 쓴다(demo.json home).
+  // FULL = SVG 전체 범위(팬 한계) / VB = 첫 화면 틀 (demo.json home)
   const FULL = { x: 0, y: 0, w: 760, h: 821 };
   let VB = { ...FULL };
   let vb = { ...VB };
-  let DATA = null;          // demo.json
-  let judge = null;         // 판정용 경계 (내 위치 첫 사용 때만 로드)
-  // 수집 중 상태 확인은 내부용 주소 매개변수로만 (?state=collecting —
-  //  화면 토글은 사용자에게 의미가 없다는 운영자 피드백으로 제거, 2026-08-12)
-  const collecting = new URLSearchParams(location.search).get('state') === 'collecting';
-  // 색 세기 비교용 (운영자 판단 도구): 기본 = 원색 그대로,
-  //   ?tone=soft  → 흰색을 18% 섞어 한 톤 낮춤
-  //   ?tone=soft2 → 30% (가장 부드러움)
-  const TONE = { soft: 0.18, soft2: 0.30 }[
-    new URLSearchParams(location.search).get('tone')] || 0;
-  function toneOf(hex) {
-    if (!TONE) return hex;
-    const n = parseInt(hex.slice(1), 16);
-    const mix = (c) => Math.round(c + (255 - c) * TONE);
-    return `rgb(${mix((n >> 16) & 255)},${mix((n >> 8) & 255)},${mix(n & 255)})`;
-  }
+  let DATA = null;
+  let judge = null;         // 판정용 경계 (위치 기능 첫 사용 때만 로드)
   let selected = null;
+  let activeCh = null;
 
   const $ = (id) => document.getElementById(id);
   const isMobile = () => matchMedia('(max-width: 768px)').matches;
-  // 지도 카드 폭을 지도 비율에 맞춘다 (좌우 빈 바다 제거).
-  // 모바일은 화면이 세로로 길어 그대로 100%를 쓴다.
+
+  // 수집 중 상태 확인은 내부용 주소 매개변수로만 (?state=collecting)
+  const collecting = new URLSearchParams(location.search).get('state') === 'collecting';
+  const COLLECT_FILL = '#dfe6ee';
+  const IDLE_FILL = '#dbe4ee';   // 아무 채널도 안 고른 상태
+  const REST_FILL = '#e6ecf3';   // 채널을 골랐을 때 그 외 지역
+
+  // 지도 카드 폭을 지도 비율에 맞춘다 (좌우 빈 바다 제거)
   function fitCard() {
-    const wrapEl = document.getElementById('lgWrap');
-    if (!wrapEl || !VB.w) return;
-    if (isMobile()) { wrapEl.style.maxWidth = ''; return; }
+    if (!wrap || !VB.w) return;
+    if (isMobile()) { wrap.style.maxWidth = ''; return; }
     const maxH = Math.min(innerHeight * 0.82, 820);
-    wrapEl.style.maxWidth = `${Math.round(maxH * (VB.w / VB.h))}px`;
+    wrap.style.maxWidth = `${Math.round(maxH * (VB.w / VB.h))}px`;
   }
   addEventListener('resize', () => { fitCard(); scheduleLabels(); });
 
-  // ── 데이터 로드 & 칠하기 & 라벨 ─────────────────────────────────────
-  const COLLECT_FILL = '#e4e3da';
-  // cache:'no-cache' = 항상 서버와 대조(변경 없으면 304) — 배포 직후 10분 캐시로
-  // 옛 데이터가 그려지는 문제 방지 (2026-08-12 실측)
+  // ── 데이터 로드 ─────────────────────────────────────────────────────
   fetch(`${base}/league/demo.json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => {
     DATA = d;
     if (d.home) {
-      // 첫 화면 = 육지 범위 그대로(세로로 긴 비율). 지도 카드 폭을 이 비율에 맞춰
-      // 좁히면 좌우 바다 여백이 사라지고 육지가 화면을 꽉 채운다 — 종전에는 넓은
-      // 카드에 세로로 긴 지도가 들어가 좌우가 통째로 빈 바다였다(2026-08-12).
       const [hx, hy, hw, hh] = d.home;
       VB = { x: hx, y: hy, w: hw, h: hh };
       vb = { ...VB };
@@ -427,28 +444,18 @@ export function getStaticPaths() {
     buildNational();
   });
 
-  // 지도의 기본 상태는 **조용하다** (운영자 설계 2026-08-12 밤):
-  //   기본      = 전 지역 중립색 한 가지
-  //   채널 선택 = 그 채널이 1위인 지역만 **국기색 그라데이션**으로 떠오름
-  // 12색을 한꺼번에 뿌리지 않으므로 "알록달록"이 구조적으로 생기지 않는다.
-  const IDLE_FILL = '#dfe6ec';   // 아무 채널도 안 고른 상태
-  const REST_FILL = '#e9eef3';   // 채널을 골랐을 때 그 외 지역 (한 톤 더 옅게)
-  let activeCh = null;
-
   function paint() {
     if (!DATA) return;
-    // ⚠ 반드시 `path[data-g]`만 — 그냥 `path`로 돌면 **시도 경계선 레이어까지 칠해진다.**
-    //   그 path는 전국 윤곽을 한 덩어리로 갖고 있어서, 채워지는 순간 지도 전체에
-    //   회색 막이 덮이고 지역색이 그 아래로 비쳐 파스텔처럼 보였다
-    //   (2026-08-12 "무슨 막 씌워놓은 것 같다"의 진짜 원인 — 색 팔레트 문제가 아니었다).
+    // ⚠ 반드시 `path[data-g]`만 — 그냥 `path`로 돌면 시도 경계선 레이어까지 칠해져
+    //   지도 전체에 회색 막이 덮인다 (2026-08-12 실사고).
     for (const p of svg.querySelectorAll('path[data-g]')) {
       const r = DATA.regions[p.dataset.g];
       p.classList.remove('won');
       if (collecting || !r) { p.style.fill = COLLECT_FILL; continue; }
       if (!activeCh) { p.style.fill = IDLE_FILL; continue; }
       if (r.t[0][0] === activeCh) {
-        p.style.fill = DATA.channels[activeCh].c;   // 국기 대표색 한 가지 (그라데이션 폐기)
-        p.classList.add('won');            // 살짝 떠오르는 그림자
+        p.style.fill = DATA.channels[activeCh].c;
+        p.classList.add('won');
       } else {
         p.style.fill = REST_FILL;
       }
@@ -457,6 +464,12 @@ export function getStaticPaths() {
       const g = svg.querySelector('#lgRegions');
       svg.querySelectorAll('#lgRegions path.won').forEach((p) => g.appendChild(p));
     }
+  }
+
+  function chIcon(code, cls = 'lg-flag') {
+    const ch = DATA.channels[code];
+    const sq = ch.i.endsWith('.svg') ? ' lg-flag--sq' : '';
+    return `<img class="${cls}${sq}" src="${base}/league/ch/${ch.i}" alt="">`;
   }
 
   // 채널 목록 (국가별 고정 순서) — 1위 지역 수를 함께 보여준다
@@ -478,20 +491,10 @@ export function getStaticPaths() {
       rail.querySelectorAll('button').forEach((x) =>
         x.classList.toggle('on', x.dataset.ch === activeCh));
       paint();
-      $('lgCapLead').textContent = activeCh
-        ? `${DATA.channels[activeCh].n}이 1위인 지역이 떠올라 있어요 (다시 누르면 해제)`
-        : '채널을 고르면 그 채널이 1위인 지역이 떠올라요';
     });
   }
 
-  function chIcon(code, cls = 'lg-flag') {
-    const ch = DATA.channels[code];
-    const sq = ch.i.endsWith('.svg') ? ' lg-flag--sq' : '';
-    return `<img class="${cls}${sq}" src="${base}/league/ch/${ch.i}" alt="">`;
-  }
-
-  // 지명 라벨 2층: 광역(축소 화면) · 시군구(그 지역이 화면에서 충분히 클 때)
-  // HTML 오버레이 방식 — 글자는 항상 화면 픽셀로 그려져 어떤 배율에서도 또렷하다
+  // ── 지명 라벨 (HTML 오버레이) ───────────────────────────────────────
   const lbls = $('lgLbls');
   let sidoEls = [], sggEls = [];
   function buildLabels() {
@@ -516,7 +519,6 @@ export function getStaticPaths() {
       sggEls.push(el);
     }
   }
-
   function placeLabel(el, rc, offX, offY) {
     const sx = ((+el.dataset.x - vb.x) / vb.w) * rc.width + offX;
     const sy = ((+el.dataset.y - vb.y) / vb.h) * rc.height + offY;
@@ -532,18 +534,15 @@ export function getStaticPaths() {
     const rc = svg.getBoundingClientRect();
     const wrc = wrap.getBoundingClientRect();
     const offX = rc.left - wrc.left, offY = rc.top - wrc.top;
-    const scale = vb.w / (rc.width || 1);           // svg 단위 / 화면 px
+    const scale = vb.w / (rc.width || 1);
     const sidoOn = vb.w > VB.w / 2.2;
     for (const el of sidoEls) {
       if (!sidoOn) { el.style.display = 'none'; continue; }
       placeLabel(el, rc, offX, offY);
     }
     for (const el of sggEls) {
-      // 전국 축척(광역 라벨이 떠 있는 동안)에는 숨긴다.
-      // 등장 문턱은 **그 라벨이 실제로 차지할 폭** 기준 — 고정 픽셀로 재면
-      // 글자 수가 다른 지역이 같은 배율에서 갈린다(영등포구는 숨고 양천구는
-      // 보이던 문제, 2026-08-12 운영자 실기기 지적).
-      const needPx = +el.dataset.chars * 11 + 10;   // 11px 글자 폭 + 여백
+      // 등장 문턱은 **그 라벨이 실제로 차지할 폭** 기준 (글자 수 반영)
+      const needPx = +el.dataset.chars * 11 + 10;
       if (sidoOn || (+el.dataset.w / scale) <= needPx) { el.style.display = 'none'; continue; }
       placeLabel(el, rc, offX, offY);
     }
@@ -556,14 +555,12 @@ export function getStaticPaths() {
   }
 
   // ── viewBox 줌·팬 ───────────────────────────────────────────────────
-  // 최대 줌 = 24배 — 더 깊으면 400m 단순화의 각이 드러나고 주변 맥락도 사라진다
-  const MINW = FULL.w / 24;
+  const MINW = FULL.w / 24;          // 최대 줌 24배
   function applyVB() {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
-    scheduleLabels();   // 팬·줌 모두 라벨 위치가 바뀐다 (rAF로 프레임당 1회)
+    scheduleLabels();
   }
   function clampPan() {
-    // 팬 한계는 **전체 범위** 기준 — 첫 화면 밖의 울릉·독도까지 끌어서 볼 수 있어야 한다
     vb.x = Math.min(Math.max(vb.x, FULL.x - vb.w * 0.25), FULL.x + FULL.w - vb.w * 0.75);
     vb.y = Math.min(Math.max(vb.y, FULL.y - vb.h * 0.25), FULL.y + FULL.h - vb.h * 0.75);
   }
@@ -573,16 +570,16 @@ export function getStaticPaths() {
              y: vb.y + ((clientY - rc.top) / rc.height) * vb.h };
   }
   function zoomAt(px, py, f) {
-    const w = Math.min(Math.max(vb.w / f, MINW), FULL.w);   // 축소 한계 = 전체 범위
+    const w = Math.min(Math.max(vb.w / f, MINW), FULL.w);
     const real = vb.w / w;
     vb.x = px - (px - vb.x) / real;
     vb.y = py - (py - vb.y) / real;
     vb.w = w;
-    vb.h = VB.h * (w / VB.w);      // 카드 비율과 어긋나면 여백이 생긴다
+    vb.h = VB.h * (w / VB.w);
     clampPan();
     applyVB();
   }
-  function animateTo(target, ms = 240) {
+  function animateTo(target, ms = 260) {
     const from = { ...vb };
     const t0 = performance.now();
     (function step(t) {
@@ -610,9 +607,8 @@ export function getStaticPaths() {
     zoomAt(p.x, p.y, e.deltaY < 0 ? 1.3 : 1 / 1.3);
   }, { passive: false });
 
-  // 포인터: 1개 = 팬 / 2개 = 핀치 (증분 방식)
-  // ⚠ setPointerCapture는 click 이벤트의 target을 svg로 바꿔 지역 클릭을 죽인다
-  //   (2026-08-11 실측) — 그래서 선택은 click이 아니라 pointerup에서 판정한다.
+  // 포인터: 1개 = 팬 / 2개 = 핀치.
+  // ⚠ setPointerCapture가 click 대상을 svg로 바꾸므로 선택은 pointerup에서 판정한다.
   const ptrs = new Map();
   let panFrom = null, pinchD = 0, movedPx = 0, downG = null, downAt = null;
   svg.addEventListener('pointerdown', (e) => {
@@ -675,7 +671,7 @@ export function getStaticPaths() {
     zoomAt(vb.x + vb.w / 2, vb.y + vb.h / 2, 1 / 1.5));
   $('lgZfit').addEventListener('click', () => animateTo({ ...VB }));
 
-  // ── 툴팁(호버 = 지역명만) ───────────────────────────────────────────
+  // 호버 = 지역명만
   const tip = $('lgTip');
   svg.addEventListener('pointermove', (e) => {
     if (e.pointerType === 'touch' || ptrs.size > 0) { tip.hidden = true; return; }
@@ -689,7 +685,7 @@ export function getStaticPaths() {
   });
   svg.addEventListener('pointerleave', () => { tip.hidden = true; });
 
-  // ── 카드 내용 (PC 플로팅 / 모바일 HUD 공용 빌더) ─────────────────────
+  // ── 지역 결과 (PC 플로팅 카드 / 모바일 HUD) ─────────────────────────
   function rowsHTML(g, hud) {
     const r = DATA.regions[g];
     const rowCls = hud ? 'lg-hrow' : 'lg-row';
@@ -706,9 +702,8 @@ export function getStaticPaths() {
     if (collecting) {
       return `<button class="lg-x" aria-label="닫기">✕</button>
         <div class="lg-cardhead"><b>${r.n}</b></div>
-        <div class="lg-collect"><b>아직 공식 순위를 모으고 있어요</b>
-        8월 11일부터 새 기준으로 측정 중이에요.
-        순위는 표본이 충분히 쌓이면 열려요.</div>
+        <div class="lg-collect"><b>순위를 집계하고 있습니다</b>
+        새 채점 기준으로 측정 중이며, 표본이 쌓이면 공개됩니다.</div>
         <a class="lg-cta" href="#" data-demo>앱에서 진행 상황 보기</a>`;
     }
     return `<button class="lg-x" aria-label="닫기">✕</button>
@@ -721,12 +716,12 @@ export function getStaticPaths() {
     if (collecting) {
       return `<button class="lg-x" aria-label="닫기">✕</button>
         <div class="lg-hudhead"><b>${r.n}</b></div>
-        <div class="lg-collect"><b>아직 공식 순위를 모으고 있어요</b>
-        8월 11일부터 새 기준으로 측정 중이에요.</div>
-        <a class="lg-hudcta" href="#" data-demo>앱에서 진행 상황 보기 →</a>`;
+        <div class="lg-collect"><b>순위를 집계하고 있습니다</b>
+        새 채점 기준으로 측정 중입니다.</div>
+        <a class="lg-hudcta" href="#" data-demo>앱에서 진행 상황 보기</a>`;
     }
     return `<button class="lg-x" aria-label="닫기">✕</button>
-      <div class="lg-hudhead"><b>${r.n}</b><span>최근 30일 · 종합 — 웨더리그 점수</span></div>
+      <div class="lg-hudhead"><b>${r.n}</b><span>최근 30일 · 웨더리그 점수</span></div>
       ${rowsHTML(g, true)}
       <a class="lg-hudcta" href="#" data-demo>우리 동네 전체 순위와 예보 받기</a>`;
   }
@@ -737,10 +732,8 @@ export function getStaticPaths() {
     selected = g;
     svg.querySelectorAll('path.sel').forEach((p) => p.classList.remove('sel'));
     const el = svg.querySelector(`path[data-g="${g}"]`);
-    // 선택 지역을 path 층 맨 뒤로 (라벨 층은 svg 직속이라 여전히 위)
     if (el) { el.classList.add('sel'); el.parentNode.appendChild(el); }
     if (isMobile()) {
-      // 모바일: 얇은 HUD — 탭마다 내용만 교체 (지도를 계속 크게 유지)
       hud.innerHTML = hudHTML(g);
       hud.hidden = false;
     } else {
@@ -775,148 +768,9 @@ export function getStaticPaths() {
     if (t.closest?.('.lg-x')) { deselect(); return; }
     if (t.closest?.('[data-demo]')) {
       e.preventDefault();
-      toast('데모 버튼이에요 — 실제 화면에서는 앱으로 이동해요');
+      toast('앱 연결은 준비 중입니다');
     }
   });
-
-  // ── 탭 전환 ─────────────────────────────────────────────────────────
-  function showTab(nat) {
-    $('tabNat').classList.toggle('on', nat);
-    $('tabMap').classList.toggle('on', !nat);
-    $('tabNat').setAttribute('aria-selected', String(nat));
-    $('tabMap').setAttribute('aria-selected', String(!nat));
-    $('secNat').hidden = !nat;
-    $('secMap').hidden = nat;
-    if (!nat) scheduleLabels();       // 숨은 동안 계산이 어긋나 있을 수 있다
-    else drawChart();                 // 폭이 바뀌었을 수 있다
-  }
-  $('tabNat').addEventListener('click', () => showTab(true));
-  $('tabMap').addEventListener('click', () => showTab(false));
-
-  // ── 전국 순위: 시상대 + 순위 변화 차트 ──────────────────────────────
-  // 순위 변화(bump) 차트: 세로축 = 순위(위가 1위), 상위 5개만 색으로 강조하고
-  // 나머지는 회색 얇은 선 — 13줄을 전부 칠하면 색으로 구분이 불가능해진다.
-  const HIGHLIGHT = 5;
-  let natOrder = [];      // 최종 순위대로 정렬된 채널 코드
-  function buildNational() {
-    const N = DATA.national;
-    const codes = Object.keys(N.rank);
-    natOrder = codes.slice().sort((a, b) =>
-      N.rank[a][N.rank[a].length - 1] - N.rank[b][N.rank[b].length - 1]);
-
-    // 시상대 3
-    $('natTop').innerHTML = natOrder.slice(0, 3).map((c, i) => {
-      const ch = DATA.channels[c];
-      const sq = ch.i.endsWith('.svg');
-      return `<div class="lg-pod lg-pod--${i + 1}">
-        <span class="rk">${i + 1}위</span>
-        <img class="ic ${sq ? 'lg-flag lg-flag--sq' : 'lg-flag'}"
-             style="width:${sq ? 42 : 46}px;height:${sq ? 42 : 32}px"
-             src="${base}/league/ch/${ch.i}" alt="">
-        <div class="nm">${ch.n}</div>
-        <div class="sc">${N.score[c][N.score[c].length - 1]}
-          <small>웨더리그 점수</small></div>
-      </div>`;
-    }).join('');
-
-    // 범례 (강조 5개만 — 나머지는 표로 보기에서 확인)
-    $('natLegend').innerHTML = natOrder.slice(0, HIGHLIGHT).map((c) =>
-      `<span><i style="background:${DATA.channels[c].c}"></i>${DATA.channels[c].n}</span>`)
-      .join('') + `<span><i style="background:#d6d5cc"></i>그 외 채널</span>`;
-
-    // 표로 보기 (색·선 없이도 읽을 수 있는 대체 경로)
-    $('natTable').innerHTML = `<table><thead><tr><th>순위</th><th>채널</th>
-      <th class="num">점수</th><th class="num">30일 전 순위</th></tr></thead><tbody>` +
-      natOrder.map((c, i) => `<tr><td>${i + 1}위</td><td>${DATA.channels[c].n}</td>
-        <td class="num">${N.score[c][N.score[c].length - 1]}</td>
-        <td class="num">${N.rank[c][0]}위</td></tr>`).join('') + `</tbody></table>`;
-
-    drawChart();
-    addEventListener('resize', drawChart);
-  }
-
-  let chartGeom = null;
-  function drawChart() {
-    if (!DATA || $('secNat').hidden) return;
-    const N = DATA.national;
-    const host = $('natChart');
-    const W = host.clientWidth || 640;
-    const H = Math.max(240, Math.min(340, W * 0.52));
-    const M = { t: 12, r: isMobile() ? 12 : 96, b: 26, l: 30 };
-    const days = N.dates.length;
-    const maxRank = Object.keys(N.rank).length;
-    const px = (i) => M.l + (i / (days - 1)) * (W - M.l - M.r);
-    const py = (r) => M.t + ((r - 1) / (maxRank - 1)) * (H - M.t - M.b);
-    chartGeom = { W, H, M, days, px, py };
-
-    const parts = [];
-    // 가로 격자 + 순위 눈금
-    for (const r of [1, 5, 10, maxRank]) {
-      if (r > maxRank) continue;
-      parts.push(`<line class="grid" x1="${M.l}" x2="${W - M.r}" y1="${py(r)}" y2="${py(r)}"/>`);
-      parts.push(`<text class="axis" x="${M.l - 7}" y="${py(r) + 3.5}"
-        text-anchor="end">${r}위</text>`);
-    }
-    // 날짜 눈금 (처음·중간·끝)
-    for (const i of [0, Math.floor((days - 1) / 2), days - 1]) {
-      const d = N.dates[i].slice(5).replace('-', '/');
-      parts.push(`<text class="axis" x="${px(i)}" y="${H - 8}"
-        text-anchor="${i === 0 ? 'start' : i === days - 1 ? 'end' : 'middle'}">${d}</text>`);
-    }
-    // 선 — 회색(그 외)을 먼저 깔고 강조 5개를 위에 올린다
-    const line = (c) => N.rank[c].map((r, i) => `${px(i).toFixed(1)},${py(r).toFixed(1)}`).join(' ');
-    natOrder.slice(HIGHLIGHT).forEach((c) =>
-      parts.push(`<polyline class="ln ln--mut" points="${line(c)}"/>`));
-    natOrder.slice(0, HIGHLIGHT).forEach((c) => {
-      parts.push(`<polyline class="ln" style="stroke:${DATA.channels[c].c}" points="${line(c)}"/>`);
-      const lr = N.rank[c][days - 1];
-      parts.push(`<circle class="dot" cx="${px(days - 1)}" cy="${py(lr)}" r="4.5"
-        fill="${DATA.channels[c].c}"/>`);
-      if (!isMobile()) {   // 넓은 화면에서만 선 끝에 이름 직접 표기
-        parts.push(`<text class="axis" x="${px(days - 1) + 10}" y="${py(lr) + 3.5}"
-          style="fill:#45443f;font-weight:600">${DATA.channels[c].n}</text>`);
-      }
-    });
-    parts.push(`<line id="ctCross" class="cross" x1="0" x2="0" y1="${M.t}"
-      y2="${H - M.b}" style="display:none"/>`);
-
-    host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img"
-      aria-label="최근 30일 전국 순위 변화">${parts.join('')}</svg>
-      <div id="ctTip" class="lg-cttip" hidden></div>`;
-    host.querySelector('svg').addEventListener('pointermove', onChartHover);
-    host.querySelector('svg').addEventListener('pointerleave', () => {
-      const t = $('ctTip'); if (t) t.hidden = true;
-      const cr = $('ctCross'); if (cr) cr.style.display = 'none';
-    });
-  }
-
-  function onChartHover(e) {
-    if (!chartGeom) return;
-    const N = DATA.national;
-    const svgEl = e.currentTarget;
-    const rc = svgEl.getBoundingClientRect();
-    const { W, M, days, px, py } = chartGeom;
-    const xv = ((e.clientX - rc.left) / rc.width) * W;
-    let i = Math.round(((xv - M.l) / (W - M.l - M.r)) * (days - 1));
-    i = Math.max(0, Math.min(days - 1, i));
-    const cross = $('ctCross');
-    cross.setAttribute('x1', px(i));
-    cross.setAttribute('x2', px(i));
-    cross.style.display = '';
-    const top = natOrder.slice().sort((a, b) => N.rank[a][i] - N.rank[b][i]).slice(0, 3);
-    const tip = $('ctTip');
-    tip.innerHTML = `<div class="dt">${N.dates[i].replace(/-/g, '.')}</div>` +
-      top.map((c) => `<div class="r"><span class="rk">${N.rank[c][i]}위</span>
-        ${chIcon(c)}<span class="nm">${DATA.channels[c].n}</span>
-        <span class="sc">${N.score[c][i]}</span></div>`).join('');
-    tip.hidden = false;
-    const hostRc = $('natChart').getBoundingClientRect();
-    const sx = (px(i) / W) * rc.width + (rc.left - hostRc.left);
-    let left = sx + 14;
-    if (left + tip.offsetWidth > hostRc.width) left = sx - tip.offsetWidth - 14;
-    tip.style.left = `${Math.max(0, left)}px`;
-    tip.style.top = `${Math.max(0, py(1) - 6)}px`;
-  }
 
   // ── 지역 검색 ───────────────────────────────────────────────────────
   const q = $('lgQ');
@@ -938,13 +792,13 @@ export function getStaticPaths() {
     q.value = DATA.regions[g].n;
     q.blur();
     zoomToRegion(g);
-    setTimeout(() => select(g), 260);
+    setTimeout(() => select(g), 280);
   });
   document.addEventListener('click', (e) => {
     if (!e.target.closest?.('.lg-search')) qList.hidden = true;
   });
 
-  // ── 내 위치 (좌표는 브라우저 안에서만 쓰고 즉시 폐기 — 서버 전송 없음) ──
+  // ── 현재 위치 (좌표는 브라우저 안에서만 쓰고 즉시 폐기 — 서버 전송 없음) ──
   function inRing(x, y, ring) {
     let ins = false;
     for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
@@ -964,16 +818,14 @@ export function getStaticPaths() {
     }
     return null;
   }
-  $('lgLoc').addEventListener('click', async () => {
+  async function locateMe(btn) {
     if (!navigator.geolocation) {
-      toast('이 브라우저에서는 위치 기능을 쓸 수 없어요');
+      toast('이 브라우저에서는 위치 기능을 사용할 수 없습니다');
       return;
     }
-    const btn = $('lgLoc');
     btn.disabled = true;
     try {
       if (!judge) {
-        toast('경계 자료를 불러오는 중이에요…');
         judge = await (await fetch(`${base}/league/judge-boundaries.json`,
           { cache: 'no-cache' })).json();
       }
@@ -981,29 +833,172 @@ export function getStaticPaths() {
         btn.disabled = false;
         const lon = pos.coords.longitude, lat = pos.coords.latitude;
         const acc = pos.coords.accuracy || 0;
-        // 디버그는 로컬 콘솔로만 — 좌표는 이 함수 밖으로 내보내지 않는다
-        console.log('[내위치]', lon.toFixed(5), lat.toFixed(5), `±${Math.round(acc)}m`);
         const accTxt = acc >= 1000 ? `±${(acc / 1000).toFixed(1)}km` : `±${Math.round(acc)}m`;
         const g = judgeRegion(lon, lat);
         if (!g) {
-          toast(`서비스 지역(대한민국 시·군·구) 밖이에요 · 정확도 ${accTxt}`);
+          toast(`서비스 지역 밖입니다 · 위치 정확도 ${accTxt}`);
         } else if (acc > 1200) {
-          // 대략적 위치(네트워크 측위 등)면 자동 선택하지 않는다 — 오판 경험 방지
-          toast(`위치 정확도가 낮아요(${accTxt}) — 지역 검색을 이용해 주세요`);
+          // 대략적 위치(네트워크 측위)면 자동 선택하지 않는다 — 오판 경험 방지
+          toast(`위치 정확도가 낮습니다 (${accTxt}) · 지역 검색을 이용해 주세요`);
         } else {
-          toast(`내 위치: ${DATA.regions[g].n} · 정확도 ${accTxt}`);
+          toast(`${DATA.regions[g].n} · 위치 정확도 ${accTxt}`);
           zoomToRegion(g);
-          setTimeout(() => select(g), 260);
+          setTimeout(() => select(g), 280);
         }
       }, () => {
         btn.disabled = false;
-        toast('위치 권한이 거절됐어요 — 검색으로 찾아보세요');
+        toast('위치 권한이 거부되었습니다 · 지역 검색을 이용해 주세요');
       }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     } catch {
       btn.disabled = false;
-      toast('경계 자료를 불러오지 못했어요');
+      toast('지역 경계 자료를 불러오지 못했습니다');
     }
-  });
+  }
+  $('lgLoc').addEventListener('click', (e) => locateMe(e.currentTarget));
+  $('lgHere').addEventListener('click', (e) => locateMe(e.currentTarget));
+
+  // ── 탭 전환 ─────────────────────────────────────────────────────────
+  function showTab(nat) {
+    $('tabNat').classList.toggle('on', nat);
+    $('tabMap').classList.toggle('on', !nat);
+    $('tabNat').setAttribute('aria-selected', String(nat));
+    $('tabMap').setAttribute('aria-selected', String(!nat));
+    $('secNat').hidden = !nat;
+    $('secMap').hidden = nat;
+    if (!nat) { fitCard(); scheduleLabels(); }
+    else drawChart();
+  }
+  $('tabNat').addEventListener('click', () => showTab(true));
+  $('tabMap').addEventListener('click', () => showTab(false));
+
+  // ── 전국 리그: 시상대 · 순위 변화 차트 · 전체 순위 표 ────────────────
+  const HIGHLIGHT = 5;      // 선을 굵게 그리는 상위 채널 수 (나머지는 흐리게)
+  let natOrder = [];
+  function buildNational() {
+    const N = DATA.national;
+    const codes = Object.keys(N.rank);
+    const lastRank = (c) => N.rank[c][N.rank[c].length - 1];
+    natOrder = codes.slice().sort((a, b) => lastRank(a) - lastRank(b));
+
+    $('natTop').innerHTML = natOrder.slice(0, 3).map((c, i) => {
+      const ch = DATA.channels[c];
+      const sq = ch.i.endsWith('.svg');
+      return `<div class="lg-pod lg-pod--${i + 1}">
+        <span class="rk">${i + 1}위</span>
+        <img class="ic lg-flag${sq ? ' lg-flag--sq' : ''}"
+             style="width:${sq ? 40 : 44}px;height:${sq ? 40 : 30}px"
+             src="${base}/league/ch/${ch.i}" alt="">
+        <div class="nm">${ch.n}</div>
+        <div class="sc">${N.score[c][N.score[c].length - 1]}
+          <span class="unit">웨더리그 점수</span></div>
+      </div>`;
+    }).join('');
+
+    const rows = natOrder.map((c, i) => {
+      const delta = N.rank[c][0] - lastRank(c);      // + = 순위 상승
+      const cls = delta > 0 ? 'up' : delta < 0 ? 'dn' : 'same';
+      const txt = delta > 0 ? `+${delta}` : delta < 0 ? `${delta}` : '–';
+      return `<tr class="${i === 0 ? 'top' : ''}">
+        <td><span class="rk">${i + 1}위</span></td>
+        <td><span class="ch">${chIcon(c)}${DATA.channels[c].n}</span></td>
+        <td class="num"><span class="sc">${N.score[c][N.score[c].length - 1]}</span></td>
+        <td class="num"><span class="dl dl--${cls}">${txt}</span></td></tr>`;
+    }).join('');
+    $('natTable').innerHTML = `<table class="lg-tbl">
+      <thead><tr><th>순위</th><th>채널</th><th class="num">웨더리그 점수</th>
+      <th class="num">30일 전 대비</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+    drawChart();
+    addEventListener('resize', drawChart);
+  }
+
+  let chartGeom = null;
+  function drawChart() {
+    if (!DATA || $('secNat').hidden) return;
+    const N = DATA.national;
+    const host = $('natChart');
+    const W = host.clientWidth || 640;
+    const H = Math.max(260, Math.min(380, W * 0.5));
+    const M = { t: 14, r: isMobile() ? 14 : 124, b: 26, l: 34 };
+    const days = N.dates.length;
+    const maxRank = Object.keys(N.rank).length;
+    const px = (i) => M.l + (i / (days - 1)) * (W - M.l - M.r);
+    const py = (r) => M.t + ((r - 1) / (maxRank - 1)) * (H - M.t - M.b);
+    chartGeom = { W, H, M, days, px, py };
+
+    const parts = [];
+    for (const r of [1, 5, 10, maxRank]) {
+      if (r > maxRank) continue;
+      parts.push(`<line class="grid" x1="${M.l}" x2="${W - M.r}" y1="${py(r)}" y2="${py(r)}"/>`);
+      parts.push(`<text class="axis" x="${M.l - 8}" y="${py(r) + 4}"
+        text-anchor="end">${r}위</text>`);
+    }
+    for (const i of [0, Math.floor((days - 1) / 2), days - 1]) {
+      const d = N.dates[i].slice(5).replace('-', '.');
+      parts.push(`<text class="axis" x="${px(i)}" y="${H - 7}"
+        text-anchor="${i === 0 ? 'start' : i === days - 1 ? 'end' : 'middle'}">${d}</text>`);
+    }
+    const line = (c) => N.rank[c].map((r, i) =>
+      `${px(i).toFixed(1)},${py(r).toFixed(1)}`).join(' ');
+    // 하위권을 먼저 흐리게 깔고 상위권을 위에 — 범례 없이 선 끝 이름으로 식별한다
+    natOrder.slice(HIGHLIGHT).forEach((c) =>
+      parts.push(`<polyline class="ln ln--sub" style="stroke:${DATA.channels[c].c}"
+        points="${line(c)}"/>`));
+    natOrder.slice(0, HIGHLIGHT).forEach((c) =>
+      parts.push(`<polyline class="ln" style="stroke:${DATA.channels[c].c}"
+        points="${line(c)}"/>`));
+    natOrder.forEach((c, i) => {
+      const lr = N.rank[c][days - 1];
+      const top = i < HIGHLIGHT;
+      if (top) {
+        parts.push(`<circle class="dot" cx="${px(days - 1)}" cy="${py(lr)}" r="4.5"
+          fill="${DATA.channels[c].c}"/>`);
+      }
+      if (!isMobile()) {   // 선 끝 이름표 (범례 대체)
+        parts.push(`<text class="endlbl${top ? '' : ' endlbl--sub'}"
+          x="${px(days - 1) + 11}" y="${py(lr) + 4}"
+          style="fill:${DATA.channels[c].c}">${DATA.channels[c].n}</text>`);
+      }
+    });
+    parts.push(`<line id="ctCross" class="cross" x1="0" x2="0" y1="${M.t}"
+      y2="${H - M.b}" style="display:none"/>`);
+
+    host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="최근 30일 전국 순위 변화">${parts.join('')}</svg>
+      <div id="ctTip" class="lg-cttip" hidden></div>`;
+    host.querySelector('svg').addEventListener('pointermove', onChartHover);
+    host.querySelector('svg').addEventListener('pointerleave', () => {
+      const t = $('ctTip'); if (t) t.hidden = true;
+      const cr = $('ctCross'); if (cr) cr.style.display = 'none';
+    });
+  }
+
+  function onChartHover(e) {
+    if (!chartGeom) return;
+    const N = DATA.national;
+    const rc = e.currentTarget.getBoundingClientRect();
+    const { W, M, days, px, py } = chartGeom;
+    const xv = ((e.clientX - rc.left) / rc.width) * W;
+    let i = Math.round(((xv - M.l) / (W - M.l - M.r)) * (days - 1));
+    i = Math.max(0, Math.min(days - 1, i));
+    const cross = $('ctCross');
+    cross.setAttribute('x1', px(i));
+    cross.setAttribute('x2', px(i));
+    cross.style.display = '';
+    const top = natOrder.slice().sort((a, b) => N.rank[a][i] - N.rank[b][i]).slice(0, 3);
+    const tipEl = $('ctTip');
+    tipEl.innerHTML = `<div class="dt">${N.dates[i].replace(/-/g, '.')}</div>` +
+      top.map((c) => `<div class="r"><span class="rk">${N.rank[c][i]}위</span>
+        ${chIcon(c)}<span class="nm">${DATA.channels[c].n}</span>
+        <span class="sc">${N.score[c][i]}</span></div>`).join('');
+    tipEl.hidden = false;
+    const hostRc = $('natChart').getBoundingClientRect();
+    const sx = (px(i) / W) * rc.width + (rc.left - hostRc.left);
+    let left = sx + 14;
+    if (left + tipEl.offsetWidth > hostRc.width) left = sx - tipEl.offsetWidth - 14;
+    tipEl.style.left = `${Math.max(0, left)}px`;
+    tipEl.style.top = `${Math.max(0, py(1) - 8)}px`;
+  }
 
   // ── 토스트 ──────────────────────────────────────────────────────────
   let toastTimer;
