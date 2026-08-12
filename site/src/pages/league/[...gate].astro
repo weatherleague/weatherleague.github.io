@@ -264,8 +264,8 @@ export function getStaticPaths() {
   /* 육지 전체에 아주 옅은 그림자 — 바다 위에 놓인 판처럼 보이게 */
   .lgv2 #lgRegions { filter: drop-shadow(0 1px 1.5px rgba(30,50,80,.16)); }
   /* 고른 채널이 1위인 지역 — 살짝 떠오른다 */
-  .lgv2 #lgMap path.won { stroke: rgba(255,255,255,.85); stroke-width: 1;
-    filter: drop-shadow(0 2px 4px rgba(15,23,42,.35)); }
+  .lgv2 #lgMap path.won { stroke: rgba(255,255,255,.9); stroke-width: 1.2;
+    filter: drop-shadow(0 3px 6px rgba(15,23,42,.45)); }
   /* 시도(광역) = 시군구보다 "조금 더" 강할 뿐 — 극단적 대비 금지 */
   .lgv2 #lgSidoLines path { fill: none; stroke: #334155; stroke-width: 1.5;
     opacity: .9; pointer-events: none; vector-effect: non-scaling-stroke;
@@ -459,17 +459,17 @@ export function getStaticPaths() {
     }
   }
 
-  // 국기색 그라데이션 — 지도 전체를 가로지르는 **한 장의 천**처럼 보이도록
-  // userSpaceOnUse로 좌표를 고정한다(지역마다 따로 지면 지저분해진다).
+  // 국기색 그라데이션 — **지역마다 국기 색이 전부 들어가게** 그린다.
+  // 처음엔 전국에 한 장으로 깔았는데(userSpaceOnUse), 지역이 그중 좁은 구간만
+  // 받아 흰색 구간에 걸린 지역은 거의 보이지 않았다(2026-08-12 실측).
   function buildGradients() {
     const NS = 'http://www.w3.org/2000/svg';
     const defs = document.createElementNS(NS, 'defs');
     for (const [code, ch] of Object.entries(DATA.channels)) {
       const lg = document.createElementNS(NS, 'linearGradient');
       lg.id = `g-${code}`;
-      lg.setAttribute('gradientUnits', 'userSpaceOnUse');
-      lg.setAttribute('x1', '90'); lg.setAttribute('y1', '60');
-      lg.setAttribute('x2', '640'); lg.setAttribute('y2', '800');
+      lg.setAttribute('x1', '0'); lg.setAttribute('y1', '0');
+      lg.setAttribute('x2', '1'); lg.setAttribute('y2', '1');
       const stops = ch.g || [ch.c, ch.c];
       stops.forEach((col, i) => {
         const st = document.createElementNS(NS, 'stop');
