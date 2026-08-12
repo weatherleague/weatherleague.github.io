@@ -419,7 +419,6 @@ export function getStaticPaths() {
       fitCard();
       applyVB();
     }
-    buildGradients();
     paint();
     buildRail();
     buildLabels();
@@ -447,7 +446,7 @@ export function getStaticPaths() {
       if (collecting || !r) { p.style.fill = COLLECT_FILL; continue; }
       if (!activeCh) { p.style.fill = IDLE_FILL; continue; }
       if (r.t[0][0] === activeCh) {
-        p.style.fill = `url(#g-${activeCh})`;
+        p.style.fill = DATA.channels[activeCh].c;   // 국기 대표색 한 가지 (그라데이션 폐기)
         p.classList.add('won');            // 살짝 떠오르는 그림자
       } else {
         p.style.fill = REST_FILL;
@@ -459,30 +458,7 @@ export function getStaticPaths() {
     }
   }
 
-  // 국기색 그라데이션 — **지역마다 국기 색이 전부 들어가게** 그린다.
-  // 처음엔 전국에 한 장으로 깔았는데(userSpaceOnUse), 지역이 그중 좁은 구간만
-  // 받아 흰색 구간에 걸린 지역은 거의 보이지 않았다(2026-08-12 실측).
-  function buildGradients() {
-    const NS = 'http://www.w3.org/2000/svg';
-    const defs = document.createElementNS(NS, 'defs');
-    for (const [code, ch] of Object.entries(DATA.channels)) {
-      const lg = document.createElementNS(NS, 'linearGradient');
-      lg.id = `g-${code}`;
-      lg.setAttribute('x1', '0'); lg.setAttribute('y1', '0');
-      lg.setAttribute('x2', '1'); lg.setAttribute('y2', '1');
-      const stops = ch.g || [ch.c, ch.c];
-      stops.forEach((col, i) => {
-        const st = document.createElementNS(NS, 'stop');
-        st.setAttribute('offset', `${(i / (stops.length - 1)) * 100}%`);
-        st.setAttribute('stop-color', col);
-        lg.appendChild(st);
-      });
-      defs.appendChild(lg);
-    }
-    svg.insertBefore(defs, svg.firstChild);
-  }
-
-  // 채널 목록 (고정 순서) — 1위 지역 수를 함께 보여준다
+  // 채널 목록 (국가별 고정 순서) — 1위 지역 수를 함께 보여준다
   function buildRail() {
     const rail = $('lgRail');
     const wins = {};
@@ -492,9 +468,8 @@ export function getStaticPaths() {
     rail.innerHTML = Object.entries(DATA.channels)
       .filter(([code]) => code !== 'om_kma' || wins[code])   // 미공개 채널은 숨김
       .map(([code, ch]) => `<button type="button" data-ch="${code}">
-        <span class="swatch" style="background:linear-gradient(135deg,${
-          (ch.g || [ch.c, ch.c]).join(',')})"></span>
-        <span class="nm">${ch.n}</span>
+        <span class="swatch" style="background:${ch.c}"></span>
+        ${chIcon(code)}<span class="nm">${ch.n}</span>
         <span class="ct">${wins[code] || 0}</span></button>`).join('');
     rail.addEventListener('click', (e) => {
       const b = e.target.closest('button[data-ch]');
