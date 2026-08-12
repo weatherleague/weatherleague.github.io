@@ -378,7 +378,11 @@ export function getStaticPaths() {
 
   function paint() {
     if (!DATA) return;
-    for (const p of svg.querySelectorAll('path')) {
+    // ⚠ 반드시 `path[data-g]`만 — 그냥 `path`로 돌면 **시도 경계선 레이어까지 칠해진다.**
+    //   그 path는 전국 윤곽을 한 덩어리로 갖고 있어서, 채워지는 순간 지도 전체에
+    //   회색 막이 덮이고 지역색이 그 아래로 비쳐 파스텔처럼 보였다
+    //   (2026-08-12 "무슨 막 씌워놓은 것 같다"의 진짜 원인 — 색 팔레트 문제가 아니었다).
+    for (const p of svg.querySelectorAll('path[data-g]')) {
       const r = DATA.regions[p.dataset.g];
       p.style.fill = collecting || !r ? COLLECT_FILL
         : DATA.channels[r.t[0][0]].c;
