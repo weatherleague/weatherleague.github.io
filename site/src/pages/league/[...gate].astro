@@ -225,9 +225,14 @@ export function getStaticPaths() {
      전국 축척에서 250개 지역에 두른 흰 선이 각 면적의 큰 몫을 먹어 색에 흰색이
      섞인다. 그래서 어두운 반투명 실선으로 바꾼다(색을 흐리지 않고 구분만 준다).
      vector-effect: 줌 배율과 무관하게 화면 픽셀 굵기 유지 */
-  .lgv2 #lgMap path { stroke: rgba(23,32,45,.30); stroke-width: .7; cursor: pointer;
+  .lgv2 #lgMap path { stroke: rgba(23,32,45,.26); stroke-width: .7; cursor: pointer;
     vector-effect: non-scaling-stroke; }
-  .lgv2 #lgMap path.sel { stroke: #0f172a; stroke-width: 2.4; }
+  /* 선택 = 색을 더 진하게 칠하는 대신 **그 면만 들어올린다** (흰 테두리 + 그림자).
+     색 대비로 알리면 지도가 시끄러워진다 — 운영자 제안 2026-08-12 */
+  .lgv2 #lgMap path.sel { stroke: #fff; stroke-width: 1.8;
+    filter: drop-shadow(0 3px 5px rgba(15,23,42,.45)); }
+  /* 육지 전체에 아주 옅은 그림자 — 바다 위에 놓인 판처럼 보이게 */
+  .lgv2 #lgRegions { filter: drop-shadow(0 1px 1.5px rgba(30,50,80,.16)); }
   /* 시도(광역) = 시군구보다 "조금 더" 강할 뿐 — 극단적 대비 금지 */
   .lgv2 #lgSidoLines path { fill: none; stroke: #334155; stroke-width: 1.5;
     opacity: .9; pointer-events: none; vector-effect: non-scaling-stroke;
