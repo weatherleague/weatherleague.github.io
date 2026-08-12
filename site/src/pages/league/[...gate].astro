@@ -43,7 +43,7 @@ export function getStaticPaths() {
                  autocomplete="off" aria-label="시군구 검색" />
           <div id="lgQList" class="lg-qlist" hidden></div>
         </div>
-        <button id="lgLoc" class="lg-btn" type="button">
+        <button id="lgLoc" class="lg-btn lg-btn--primary" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10Z"/>
@@ -51,10 +51,6 @@ export function getStaticPaths() {
           </svg>
           내 위치
         </button>
-        <div class="lg-demo-toggle" role="group" aria-label="상태 데모">
-          <button id="lgModeOpen" class="lg-chip on" type="button">공개 후</button>
-          <button id="lgModeCol" class="lg-chip" type="button">수집 중</button>
-        </div>
       </div>
 
       <div class="lg-mapwrap" id="lgWrap">
@@ -114,13 +110,9 @@ export function getStaticPaths() {
   .lgv2 .lg-btn svg { width: 16px; height: 16px; }
   .lgv2 .lg-btn:hover { background: #f4f3ec; }
   .lgv2 .lg-btn[disabled] { opacity: .5; cursor: wait; }
-  .lgv2 .lg-demo-toggle { margin-left: auto; display: flex; gap: 4px;
-    background: #ecebe2; border-radius: 10px; padding: 3px; }
-  .lgv2 .lg-chip { border: 0; background: none; padding: 7px 12px;
-    border-radius: 8px; font: inherit; font-size: 13px; color: #6d6c64;
-    cursor: pointer; }
-  .lgv2 .lg-chip.on { background: #fff; color: #1d1d1b;
-    box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .lgv2 .lg-btn--primary { background: #1c2b4a; color: #fff;
+    border-color: #1c2b4a; font-weight: 600; }
+  .lgv2 .lg-btn--primary:hover { background: #26375e; }
   .lgv2 .lg-mapwrap { position: relative; background: #fff;
     border: 1px solid #e5e4db; border-radius: 14px; overflow: hidden; }
   .lgv2 #lgMap { display: block; width: 100%; height: auto; touch-action: none;
@@ -129,6 +121,10 @@ export function getStaticPaths() {
   .lgv2 #lgMap path { stroke: #fff; stroke-width: .8; cursor: pointer;
     vector-effect: non-scaling-stroke; }
   .lgv2 #lgMap path.sel { stroke: #1d1d1b; stroke-width: 1.8; }
+  /* 시도(광역) 경계선 — 클릭을 가로채지 않는 표시 전용 층 */
+  .lgv2 #lgSidoLines path { fill: none; stroke: #55544c; stroke-width: 1.1;
+    opacity: .6; pointer-events: none; vector-effect: non-scaling-stroke;
+    stroke-linejoin: round; }
   /* 지명 라벨 — SVG 밖 HTML 오버레이 (SVG 텍스트는 확대 시 폰 GPU가 글자를
      뭉갠다, 2026-08-12 실기기 피드백). 위치는 JS가 매 프레임 화면 좌표로 환산 */
   .lgv2 .lg-lbls { position: absolute; inset: 0; pointer-events: none;
@@ -220,7 +216,9 @@ export function getStaticPaths() {
   let vb = { ...VB };
   let DATA = null;          // demo.json
   let judge = null;         // 판정용 경계 (내 위치 첫 사용 때만 로드)
-  let collecting = false;   // 상태 데모: 수집 중
+  // 수집 중 상태 확인은 내부용 주소 매개변수로만 (?state=collecting —
+  //  화면 토글은 사용자에게 의미가 없다는 운영자 피드백으로 제거, 2026-08-12)
+  const collecting = new URLSearchParams(location.search).get('state') === 'collecting';
   let selected = null;
 
   const $ = (id) => document.getElementById(id);
@@ -471,7 +469,7 @@ export function getStaticPaths() {
     return `<button class="lg-x" aria-label="닫기">✕</button>
       <div class="lg-cardhead"><b>${r.n}</b><span>최근 30일 · 종합</span></div>
       <div class="lg-schead">웨더리그 점수</div>${rowsHTML(g, false)}
-      <a class="lg-cta" href="#" data-demo>전체 13채널 순위 보기 — 앱에서</a>`;
+      <a class="lg-cta" href="#" data-demo>우리 동네 전체 순위와 예보 받기</a>`;
   }
   function hudHTML(g) {
     const r = DATA.regions[g];
@@ -485,7 +483,7 @@ export function getStaticPaths() {
     return `<button class="lg-x" aria-label="닫기">✕</button>
       <div class="lg-hudhead"><b>${r.n}</b><span>최근 30일 · 종합 — 웨더리그 점수</span></div>
       ${rowsHTML(g, true)}
-      <a class="lg-hudcta" href="#" data-demo>전체 13채널 순위 보기 — 앱에서 →</a>`;
+      <a class="lg-hudcta" href="#" data-demo>우리 동네 전체 순위와 예보 받기 →</a>`;
   }
 
   const card = $('lgCard');
@@ -535,17 +533,6 @@ export function getStaticPaths() {
       toast('데모 버튼이에요 — 실제 화면에서는 앱으로 이동해요');
     }
   });
-
-  // ── 상태 데모 토글 ──────────────────────────────────────────────────
-  function setMode(col) {
-    collecting = col;
-    $('lgModeOpen').classList.toggle('on', !col);
-    $('lgModeCol').classList.toggle('on', col);
-    paint();
-    if (selected) select(selected);
-  }
-  $('lgModeOpen').addEventListener('click', () => setMode(false));
-  $('lgModeCol').addEventListener('click', () => setMode(true));
 
   // ── 지역 검색 ───────────────────────────────────────────────────────
   const q = $('lgQ');
