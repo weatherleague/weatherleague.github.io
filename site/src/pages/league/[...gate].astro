@@ -47,7 +47,9 @@ export function getStaticPaths() {
           <h2>전국 예보 순위</h2>
           <p>최근 30일 · 웨더리그 점수 기준</p>
         </div>
-        <div id="natTop" class="lg-podium"></div>
+        <div id="natTop" class="lg-podium">
+          <div id="podTip" class="lg-podtip" hidden></div>
+        </div>
 
         <div class="lg-panel">
           <h3 class="lg-panel-title">순위 변화</h3>
@@ -160,9 +162,17 @@ export function getStaticPaths() {
     margin: 0 0 14px; }
 
   /* ── 전국 시상대 ── */
-  .lgv2 .lg-podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .lgv2 .lg-podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    position: relative; }
+  /* cursor: help — 누르는 카드가 아니라 **설명이 딸린 정보**라는 신호 (2026-08-13) */
   .lgv2 .lg-pod { background: var(--bg-soft); border-radius: 18px; padding: 20px 16px;
-    text-align: center; }
+    text-align: center; cursor: help; }
+  .lgv2 .lg-podtip { position: absolute; z-index: 40; max-width: 330px;
+    background: var(--ink); color: #fff; font-size: 12.5px; line-height: 1.55;
+    padding: 11px 14px; border-radius: 12px; white-space: pre-line;
+    letter-spacing: -0.03em; pointer-events: none;
+    box-shadow: 0 10px 30px rgba(22, 48, 79, .3); }
+  .lgv2 .lg-podtip b { display: block; font-size: 13px; margin-bottom: 3px; }
   .lgv2 .lg-pod--1 { background: var(--deep); color: #fff;
     box-shadow: 0 10px 26px rgba(20, 42, 93, .24); }
   .lgv2 .lg-pod .rk { display: inline-block; font-size: 12px; font-weight: 700;
@@ -884,10 +894,11 @@ export function getStaticPaths() {
     const lastRank = (c) => N.rank[c][N.rank[c].length - 1];
     natOrder = codes.slice().sort((a, b) => lastRank(a) - lastRank(b));
 
+    const podTip = $('podTip');
     $('natTop').innerHTML = natOrder.slice(0, 3).map((c, i) => {
       const ch = DATA.channels[c];
       const sq = ch.i.endsWith('.svg');
-      return `<div class="lg-pod lg-pod--${i + 1}">
+      return `<div class="lg-pod lg-pod--${i + 1}" data-ch="${c}">
         <span class="rk">${i + 1}위</span>
         <img class="ic lg-flag${sq ? ' lg-flag--sq' : ''}"
              style="width:${sq ? 40 : 44}px;height:${sq ? 40 : 30}px"
@@ -897,6 +908,9 @@ export function getStaticPaths() {
           <span class="unit">웨더리그 점수</span></div>
       </div>`;
     }).join('');
+    // innerHTML이 툴팁 노드를 지우므로 다시 붙인다
+    $('natTop').appendChild(podTip);
+    bindPodTip(podTip);
 
     const rows = natOrder.map((c, i) => {
       const delta = N.rank[c][0] - lastRank(c);      // + = 순위 상승
@@ -914,6 +928,30 @@ export function getStaticPaths() {
 
     drawChart();
     addEventListener('resize', drawChart);
+  }
+
+  // 시상대 카드 위에 채널 소개(앱과 같은 story_ko)를 띄운다.
+  // 목적은 정보 전달이면서 동시에 **"이 카드는 버튼이 아니다"라는 신호** — 눌러도
+  // 아무 일이 없는 카드를 버튼으로 오해하는 것을 막는다 (운영자 지적 2026-08-13).
+  function bindPodTip(tipEl) {
+    const host = $('natTop');
+    host.querySelectorAll('.lg-pod').forEach((cardEl) => {
+      const ch = DATA.channels[cardEl.dataset.ch];
+      if (!ch || !ch.s) return;
+      cardEl.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'touch') return;      // 손가락은 hover가 없다
+        tipEl.innerHTML = `<b>${ch.n}</b>${ch.s}`;
+        tipEl.hidden = false;
+        const hr = host.getBoundingClientRect();
+        const cr = cardEl.getBoundingClientRect();
+        const w = tipEl.offsetWidth;
+        let x = cr.left - hr.left + cr.width / 2 - w / 2;
+        x = Math.max(0, Math.min(x, hr.width - w));
+        tipEl.style.left = `${x}px`;
+        tipEl.style.top = `${cr.bottom - hr.top + 8}px`;
+      });
+      cardEl.addEventListener('pointerleave', () => { tipEl.hidden = true; });
+    });
   }
 
   let chartGeom = null;
