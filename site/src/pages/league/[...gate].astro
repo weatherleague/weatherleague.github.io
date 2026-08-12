@@ -392,16 +392,31 @@ export function getStaticPaths() {
     buildNational();
   });
 
+  // 지도에 몇 색을 쓸 것인가 (비교용 — 운영자 판단 대상 2026-08-12 밤)
+  //   기본        = 채널 13색 전부 (지금 화면)
+  //   ?map=top5  = **전국 상위 5개만 색**, 나머지는 중립색 하나로 묶음.
+  //                차트와 같은 색 문법이 되고, 지도가 훨씬 조용해진다.
+  const MAP_MODE = new URLSearchParams(location.search).get('map') || '';
+  const OTHER_FILL = '#aeb8c2';
+  let topColorSet = null;
+
   function paint() {
     if (!DATA) return;
+    if (MAP_MODE === 'top5' && DATA.national && !topColorSet) {
+      const rk = DATA.national.rank;
+      const last = (c) => rk[c][rk[c].length - 1];
+      topColorSet = new Set(Object.keys(rk).sort((a, b) => last(a) - last(b)).slice(0, 5));
+    }
     // ⚠ 반드시 `path[data-g]`만 — 그냥 `path`로 돌면 **시도 경계선 레이어까지 칠해진다.**
     //   그 path는 전국 윤곽을 한 덩어리로 갖고 있어서, 채워지는 순간 지도 전체에
     //   회색 막이 덮이고 지역색이 그 아래로 비쳐 파스텔처럼 보였다
     //   (2026-08-12 "무슨 막 씌워놓은 것 같다"의 진짜 원인 — 색 팔레트 문제가 아니었다).
     for (const p of svg.querySelectorAll('path[data-g]')) {
       const r = DATA.regions[p.dataset.g];
-      p.style.fill = collecting || !r ? COLLECT_FILL
-        : toneOf(DATA.channels[r.t[0][0]].c);
+      if (collecting || !r) { p.style.fill = COLLECT_FILL; continue; }
+      const win = r.t[0][0];
+      p.style.fill = topColorSet && !topColorSet.has(win)
+        ? OTHER_FILL : toneOf(DATA.channels[win].c);
     }
   }
 
