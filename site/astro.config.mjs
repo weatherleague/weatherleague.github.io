@@ -6,6 +6,8 @@ import mdx from '@astrojs/mdx';
 // ⚠ 이 값이 사이트맵·canonical·og:url·글 구조화 데이터의 기준이다 — 여기만 바꾸면 전부 따라온다.
 // ⚠ 도메인 설정은 저장소 루트의 CNAME 파일이 지킨다. 그 파일은 site/public/CNAME 이 원본이며,
 //   빌드마다 배포본에 다시 깔린다(루트에만 두면 언젠가 복사 과정에서 지워질 수 있다).
+// ⚠ 배포는 자동이다 (2026-08-13~): site/** 를 main에 푸시하면 .github/workflows/deploy-site.yml 이
+//   빌드 → 검증 게이트 12항목 → GitHub Pages 직접 배포까지 한다. 로컬 빌드·복사·산출물 커밋 불필요.
 export default defineConfig({
   site: 'https://weatherleague.kr',
   // 사이트맵 = 검색엔진에 "우리 사이트에 이런 주소들이 있다"고 건네는 목록표.
