@@ -1,0 +1,108 @@
+# 웹 배포 자동화 (2026-08-13) — "소스(site/)가 진실의 원본"
+#
+# 종전: 로컬에서 빌드 → 산출물을 루트/preview에 복사 → 커밋 (전부 수동, 복사 누락 위험)
+# 이제: site/** 푸시마다 여기서 본 빌드 + 미리보기 빌드 → 검증 게이트 → Pages에 직접 배포.
+#       산출물을 저장소에 다시 커밋하지 않는다 (커밋 로그 오염·워크플로 루프 원천 차단).
+#
+# ⚠ 첫 가동 조건: 저장소 Settings → Pages → Build and deployment → Source를
+#   "GitHub Actions"로 바꿔야 한다 (한 번만). 그 전까지 deploy 잡은 실패하고,
+#   기존 배포(루트 커밋분)가 계속 서빙된다 — 사이트가 꺼지는 순간은 없다.
+# ⚠ 루트의 옛 산출물(index.html 등)은 되돌리기 안전판으로 당분간 남긴다.
+#   되돌리기 = Settings에서 Source를 다시 "Deploy from a branch"로 (클릭 한 번).
+#
+# 검증 게이트(배포 전 필수 통과) — 2026-08-13 운영자 조건:
+#   본 사이트에 리그 페이지 미포함 · 미리보기 noindex/robots 차단/사이트맵 미생성 유지 ·
+#   CNAME(자체 도메인)·네이버 인증 메타·사이트맵 존재 · 빌드 실패 시 배포 없음.
+
+name: deploy-site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/deploy-site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: 의존성 설치 (잠금 파일 그대로)
+        run: npm ci
+
+      - name: 본 사이트 빌드 (dist)
+        run: npm run build
+
+      - name: 미리보기 빌드 (dist-preview — 초안 포함, base=/preview)
+        run: npm run build:preview
+
+      - name: 배포본 조립 (본 사이트 + /preview)
+        run: |
+          rm -rf _site
+          mkdir _site
+          cp -r dist/. _site/
+          mkdir -p _site/preview
+          cp -r dist-preview/. _site/preview/
+
+      - name: 배포 전 검증 게이트 (하나라도 걸리면 배포하지 않는다)
+        run: |
+          set -eu
+          fail() { echo "::error::검증 게이트 실패 — $1"; exit 1; }
+
+          # 본 사이트 기본
+          test -f _site/index.html || fail "본 사이트 index.html 없음"
+          grep -q 'naver-site-verification' _site/index.html || fail "네이버 인증 메타 소실"
+          test -f _site/CNAME || fail "CNAME 소실 (자체 도메인 풀림 위험)"
+          grep -qx 'weatherleague.kr' _site/CNAME || fail "CNAME 값이 weatherleague.kr 아님"
+
+          # SEO 자산
+          test -f _site/robots.txt || fail "robots.txt 없음"
+          grep -q 'Disallow: /preview/' _site/robots.txt || fail "robots의 미리보기 차단 소실"
+          test -f _site/sitemap-index.xml || fail "사이트맵 없음"
+          ! grep -q '/preview/' _site/sitemap-*.xml || fail "사이트맵에 미리보기 주소가 들어감"
+
+          # 공개 게이트 (SPEC 6.11): 리그 페이지는 미리보기에만 존재해야 한다
+          test ! -e _site/league/index.html || fail "리그 페이지가 본 사이트에 새어 나옴"
+
+          # 미리보기 3중 차단 유지
+          test -f _site/preview/index.html || fail "미리보기 index.html 없음"
+          grep -q 'noindex' _site/preview/index.html || fail "미리보기 noindex 소실"
+          test ! -e _site/preview/sitemap-index.xml || fail "미리보기에 사이트맵이 생김"
+          test -f _site/preview/league/index.html || fail "미리보기 리그 페이지 없음"
+
+          echo "검증 게이트 전부 통과"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
