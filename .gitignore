@@ -1,6 +1,7 @@
 site/node_modules/
 site/dist/
 site/dist-preview/
+site/_site/
 site/.astro/
 home.png
 league.png

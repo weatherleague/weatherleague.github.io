@@ -84,12 +84,15 @@ jobs:
 
           # 공개 게이트 (SPEC 6.11): 리그 페이지는 미리보기에만 존재해야 한다
           test ! -e _site/league/index.html || fail "리그 페이지가 본 사이트에 새어 나옴"
+          # 기업·기관(B2B) 페이지도 같은 게이트 — 운영자 확인 전까지 미리보기 전용 (2026-08-17)
+          test ! -e _site/business/index.html || fail "기업·기관 페이지가 본 사이트에 새어 나옴"
 
           # 미리보기 3중 차단 유지
           test -f _site/preview/index.html || fail "미리보기 index.html 없음"
           grep -q 'noindex' _site/preview/index.html || fail "미리보기 noindex 소실"
           test ! -e _site/preview/sitemap-index.xml || fail "미리보기에 사이트맵이 생김"
           test -f _site/preview/league/index.html || fail "미리보기 리그 페이지 없음"
+          test -f _site/preview/business/index.html || fail "미리보기 기업·기관 페이지 없음"
 
           echo "검증 게이트 전부 통과"
 

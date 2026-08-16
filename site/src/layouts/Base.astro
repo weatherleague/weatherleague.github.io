@@ -91,8 +91,13 @@ const MAIL = 'contact.weatherleague@gmail.com';
           웨더리그
         </a>
         <nav class="nav" aria-label="주 메뉴">
-          {/* 예보 순위 탭은 아직 미리보기에만 있다 — 공개 게이트 = v4 종합순위 공개
-              가능 상태(BACKLOG 웹 트랙 ③). 본 사이트에 링크를 걸면 404가 된다. */}
+          {/* 기업·기관(B2B)·예보 순위 탭은 아직 미리보기에만 있다 — 두 페이지 모두
+              getStaticPaths 게이트로 미리보기 빌드에서만 생성된다. 본 사이트에 링크를
+              걸면 404가 된다. 공개 게이트: 리그 = v4 종합순위 공개 가능 상태(BACKLOG 웹
+              트랙 ③) / 기업·기관 = 운영자 확인(문안·디자인).
+              ⚠ 링크를 여는 날에는 **해당 페이지의 getStaticPaths 게이트와 deploy-site.yml의
+              "본 사이트에 새어 나옴" 검사도 함께** 손봐야 한다 (불변 13 — 짝을 이루는 것). */}
+          {isPreview && <a class="nav-link" href={`${base}/business/`}>기업·기관</a>}
           {isPreview && <a class="nav-link" href={`${base}/league/`}>예보 순위</a>}
           <a class="nav-link" href={`${base}/blog/`}>블로그</a>
           {/* ⚠ mailto는 **메일 앱이 없는 PC에서 아무 반응도 하지 않는다**(윈도우 실측 2026-08-10).
