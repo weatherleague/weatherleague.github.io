@@ -1,23 +1,40 @@
 ---
-// 기업·기관 (B2B) — 웨더리그가 무엇을 어떻게 채점하는지, 무엇을 제공할 수 있는지.
+// 기업·기관 (B2B) — 2026-08-17 개편판 (초판 대비 분량 약 55%)
 //
 // ⚠ 이 페이지는 **미리보기 빌드에서만 생성된다** (아래 getStaticPaths 게이트 — 리그 페이지와
-//   같은 방식, 불변 13 "짝을 이루는 것"). 본 사이트 공개는 운영자 확인 후 게이트를 지우면 된다.
+//   같은 방식, 불변 13). 본 사이트 공개는 운영자 확인 후 게이트를 지우면 된다.
 //   deploy-site.yml의 검증 게이트가 "본 사이트에 새어 나오지 않았는지"를 매 배포 검사한다.
 //
-// 문안 원본: 비공개 저장소 `웨더리그_B2B페이지_문안_v1.md` (H1은 2026-08-17 A′ 확정).
+// 문안 원본: 비공개 저장소 `웨더리그_B2B페이지_문안_v1.md`.
 //
-// 이 페이지가 지키는 것 3가지 (문안 문서 0장):
-//   ⓐ 쉬운 말 + 구체적 절차 — 전문성은 어려운 단어가 아니라 검증 가능한 절차에서 나온다.
-//      "AI"·"고도화된 알고리즘" 같은 말은 쓰지 않는다.
-//   ⓑ **"여기까지 공개, 여기부터 자산"을 페이지에 명시** — 가중치 산식·상수·채널별 가중치
-//      값은 비공개. 감추는 게 아니라 선을 긋는 편이 신뢰를 만든다.
-//   ⓒ 없는 것은 없다고 쓴다 — 데이터 축적이 짧아 계절별 분석은 아직 못 판다고 적는다.
+// ── 개편 이유 (2026-08-17, 운영자·GPT 검토) ────────────────────────────────
+// 초판은 중간부터 "사업 제안"이 아니라 "방법론 백서"가 됐다. 읽는 사람이 정작
+// "그래서 나한테 뭘 주는데?"에 닿기 전에 지쳤다. 그래서 순서를 바꿨다:
+//   초판  문제 → 만드는 과정 → 자체 모델 철학 → 공정성 해명 → 활용 → **상품**
+//   개편  문제 → **상품** → 만드는 과정 → 공정성(자체 모델 포함) → 활용 → 범위 → FAQ
+// 그리고 공정성 4항목과 자체 모델 섹션을 **한 섹션으로 합쳤다** — 둘이 연달아 나오면
+// 기술 설명이 다시 길어진다.
 //
-// ⚠ **채점 규칙의 세부 숫자를 넣지 말 것** (±1.5°C·50:30:20 등). v4 재설계 중이라
-//   넣는 순간 낡는다. 원리로만 서술한다.
-// ⚠ **가격·결제 문구 금지** — 통신판매업 신고 등이 선행돼야 한다(수익화 전략 7장).
-//   CTA는 "문의"까지만.
+// ── 이 페이지가 지키는 것 ──────────────────────────────────────────────
+// ⓐ 쉬운 말 + 구체적 숫자(723·97·12·250여). 숫자가 곧 전문성이다.
+//    "AI"·"고도화된 알고리즘" 같은 말은 쓰지 않는다.
+// ⓑ 핵심 자산 비공개 — 가중치 산식·상수·채널별 가중치 값은 싣지 않는다.
+//    ⚠ 초판의 "어디까지 공개하나요" 박스는 **뺐다**. 자체 모델 설명을 원칙 4개에서
+//      두 문장으로 줄이자 감출 산식 자체가 페이지에 없어져, 방어 문구가 군더더기가 됐다.
+// ⓒ 없는 것은 없다고 쓴다 — "지금 가능한 범위" 섹션은 반드시 유지한다(신뢰 장치).
+//
+// ── 절대 되돌리면 안 되는 것 3가지 ─────────────────────────────────────
+// 1. ⚠ **"원본 데이터를 드립니다"라고 쓰지 말 것.** 이용약관 제8조 2항 — 예보·관측
+//    데이터의 권리는 **각 제공처(기상청·Open-Meteo·오픈웨더)에 있다.** 우리가 줄 수 있는
+//    것은 **우리가 만든 채점 결과·순위·분석**뿐이다. 제공처별 이용조건 확인 전까지
+//    원본 재배포를 약속하면 안 된다.
+// 2. ⚠ **API를 암시하지 말 것.** 우리는 API를 제공하지 않는다(수익화 전략 4층 = "리포트",
+//    로드맵에 API 없음). 초판 CTA "데이터 문의하기"가 API 기대를 만들어 교체했다.
+// 3. ⚠ **채점 규칙의 세부 숫자 금지** (±1.5°C·50:30:20 등). v4 재설계 중이라 넣는 순간
+//    낡는다. 원리로만 서술한다. 가격·결제 문구도 금지(통신판매업 신고 등 선행).
+//
+// ⚠ 히어로 CTA는 **하나뿐이다.** 초판의 "예보 순위 보기" 보조 버튼은 뺐다 — 리그 페이지가
+//   아직 미리보기 전용이라 본 사이트에 공개하는 순간 404가 된다. 리그가 공개되면 그때 되살린다.
 import Base from '../../layouts/Base.astro';
 
 export function getStaticPaths() {
@@ -27,14 +44,13 @@ export function getStaticPaths() {
     : [];
 }
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const MAIL = 'contact.weatherleague@gmail.com';
 // 헤더의 "제휴 문의"와 제목을 다르게 준다 — 문의가 어디서 왔는지 메일함에서 구분된다
 const MAILTO = `mailto:${MAIL}?subject=${encodeURIComponent('[웨더리그 기업 문의]')}`;
 
 const title = '기업·기관을 위한 날씨 데이터 — 웨더리그';
 const description =
-  '기상청과 국내외 기상 모델의 예보를 실제 관측과 매일 대조합니다. 전국 시·군·구별 예보 정확도 기록과 웨더리그 자체 앙상블 모델을 소개합니다.';
+  '기상청과 국내외 예보를 실제 관측과 매일 대조해, 지역별로 어떤 예보가 잘 맞았는지 비교합니다. 지역 정확도 리포트·분석용 데이터·맞춤 진단을 제공합니다.';
 ---
 
 <Base {title} {description} path="/business/">
@@ -51,12 +67,11 @@ const description =
         <span class="accent shine">성적표를 보세요.</span>
       </h1>
       <p class="lead" data-reveal style="--d:.1s">
-        기상청과 국내외 기상 모델의 예보를 실제 관측과 매일 대조합니다.<br />
-        지역별로 어떤 예보가 실제로 잘 맞았는지, 데이터로 확인하세요.
+        기상청과 국내외 예보를 실제 관측과 매일 대조해,<br />
+        지역별로 어떤 예보가 실제로 잘 맞았는지 비교합니다.
       </p>
       <div class="cta-row" data-reveal style="--d:.15s">
-        <a class="btn btn-navy" href={MAILTO} data-mail={MAIL}>데이터 문의하기</a>
-        <a class="btn biz-btn-ghost" href={`${base}/league/`}>예보 순위 보기</a>
+        <a class="btn btn-navy" href={MAILTO} data-mail={MAIL}>우리 지역 샘플 받기</a>
       </div>
     </div>
   </section>
@@ -65,42 +80,64 @@ const description =
   <section class="block" aria-label="채점 규모">
     <div class="container">
       <div class="stats-band" data-reveal>
-        <div class="stat"><b>12개</b><span>매일 채점하는 국내외 예보 채널</span></div>
-        <div class="stat"><b>250여 곳</b><span>채점 단위 (시·군·구)</span></div>
+        <div class="stat"><b>12개</b><span>매일 비교하는 국내외 예보 채널</span></div>
+        <div class="stat"><b>250여 곳</b><span>채점 단위 · 전국 시·군·구</span></div>
         <div class="stat"><b>3,000여 건</b><span>매일 채점하는 예보</span></div>
       </div>
     </div>
   </section>
 
-  <!-- ③ 문제 제기 -->
+  <!-- ③ 문제 제기 — 짧게 -->
   <section class="block">
     <div class="container">
       <div class="sec-head" data-reveal>
         <h2>예보가 틀리면, 비용은 현장이 냅니다.</h2>
         <p>
-          발주량, 인력 배치, 전력 수요, 야외 공정 일정 —<br />
-          많은 결정이 “내일 비가 오는가” 한 줄에 걸려 있습니다.<br />
-          그런데 그 한 줄을 어디서 가져올지는, 대개 습관으로 정해집니다.
+          발주량과 재고, 인력 배치, 전력 수요, 야외 공정과 물류 일정.<br />
+          많은 결정이 날씨에 걸려 있지만, <b>어떤 예보를 기준으로 삼을지는
+          대개 관행으로 정해집니다.</b>
         </p>
       </div>
-      <ul class="biz-qlist" data-reveal>
-        <li>우리 사업장이 있는 지역에서, 지금 쓰는 예보의 적중률은 몇 %인가요?</li>
-        <li>그 숫자는 여름과 겨울에 같은가요?</li>
-        <li>다른 예보로 바꾸면 얼마나 나아지는지, 비교해 본 적 있나요?</li>
-      </ul>
-      <p class="biz-close" data-reveal>
-        세 질문에 <b>숫자로</b> 답할 수 있는 자료는 국내에 거의 없습니다.<br />
-        웨더리그는 그 자료를 매일 만듭니다.
+      <p class="biz-lead-q" data-reveal>
+        그렇다면 우리 사업장이 있는 지역에서는<br />
+        <b>어떤 예보가 실제로 가장 잘 맞았을까요?</b>
       </p>
     </div>
   </section>
 
-  <!-- ④ 채점 방식 3단계 -->
+  <!-- ④ 상품 — 초판에서 맨 아래였던 것을 위로 올렸다 -->
   <section class="block">
     <div class="container">
       <div class="sec-head" data-reveal>
-        <h2>채점에는 사람 손이 들어가지 않습니다.</h2>
-        <p>매일 같은 시각에, 같은 규칙으로 자동으로 돌아갑니다.</p>
+        <h2>기업에는 이렇게 제공합니다</h2>
+      </div>
+      <div class="features">
+        <div class="feature" data-reveal>
+          <span class="k gold">01</span>
+          <h3>지역 정확도 리포트</h3>
+          <p>원하는 지역과 기간의 채널별 성적·순위·오차 특성. 어떤 예보가 강했고 어떤 항목에서 갈렸는지 한눈에.</p>
+        </div>
+        {/* ⚠ 문구 주의: "원본 제공"이라 쓰지 않는다 — 파일 상단 주석 1번 참조 */}
+        <div class="feature" data-reveal style="--d:.08s">
+          <span class="k blue">02</span>
+          <h3>분석용 데이터</h3>
+          <p>지역·기간별 비교 결과와 채점 데이터를 분석 가능한 형태로. 필요한 범위는 협의해 구성합니다.</p>
+        </div>
+        <div class="feature" data-reveal style="--d:.16s">
+          <span class="k green">03</span>
+          <h3>맞춤 진단</h3>
+          <p>사업장·지점 목록을 주시면 그 지역만 따로 모아 집계합니다. 전국 평균이 아니라 실제 현장 기준으로.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 만드는 과정 — 설명을 초판의 절반으로 -->
+  <section class="block">
+    <div class="container">
+      <div class="sec-head" data-reveal>
+        <h2>데이터는 이렇게 만듭니다</h2>
+        <p>사람의 판단이 들어가지 않습니다. 매일 같은 절차, 같은 규칙으로 자동 처리합니다.</p>
       </div>
       <div class="steps">
         <div class="step" data-reveal>
@@ -111,13 +148,8 @@ const description =
             </svg>
           </div>
           <span class="step-num">STEP 1</span>
-          <h3>봉인</h3>
-          <p>
-            매일 저녁, 각 채널의 내일 예보를 그대로 저장합니다.
-            저장한 뒤에는 고칠 수 없습니다.
-            <b>발표 시각까지 함께 기록</b>하기 때문에, 발표 시각이 다른 예보끼리
-            비교하는 일이 생기지 않습니다.
-          </p>
+          <h3>예보를 저장합니다</h3>
+          <p>정해진 시각에 각 채널의 예보를 저장하고 발표 시각을 함께 기록합니다. 저장한 예보를 나중에 결과에 맞춰 고치지 않습니다.</p>
         </div>
         <div class="step" data-reveal style="--d:.1s">
           <div class="step-icon">
@@ -128,12 +160,8 @@ const description =
             </svg>
           </div>
           <span class="step-num">STEP 2</span>
-          <h3>대조</h3>
-          <p>
-            다음 날, 기상청 관측 기록과 하나하나 맞춰봅니다.
-            정답지는 전국 무인 관측소 <b>723곳</b>(비·기온)과 유인 관측소 <b>97곳</b>(구름)이고,
-            각 시·군·구는 <b>가장 가까운 관측 지점</b>을 정답으로 씁니다.
-          </p>
+          <h3>실제 날씨와 대조합니다</h3>
+          <p>비와 기온은 전국 자동기상관측소 <b>723곳</b>, 구름은 종관기상관측소(ASOS) <b>97곳</b>을 정답지로 씁니다. 시·군·구마다 가장 가까운 지점을 고정해 둡니다.</p>
         </div>
         <div class="step" data-reveal style="--d:.2s">
           <div class="step-icon">
@@ -143,135 +171,77 @@ const description =
             </svg>
           </div>
           <span class="step-num">STEP 3</span>
-          <h3>재계산</h3>
-          <p>
-            최근 성적만 남기는 방식으로 순위를 다시 매깁니다.
-            지난달의 부진은 자연히 씻기고, 요즘 잘 맞는 채널이 위로 올라옵니다.
-          </p>
+          <h3>최근 성적을 다시 계산합니다</h3>
+          <p>과거의 이름값이 아니라 최근 실제 성적을 반영합니다. 어느 채널이 요즘 우리 지역에서 잘 맞는지 같은 기준으로 계속 다시 계산합니다.</p>
         </div>
       </div>
-      <p class="biz-note" data-reveal>
-        모든 채널이 같은 날, 같은 정답지, 같은 산식으로 채점됩니다. 특정 채널만의 예외 규칙은 없습니다.
-      </p>
     </div>
   </section>
 
-  <!-- ⑤ 웨더리그 모델 — 공개/비공개 경계 -->
+  <!-- ⑥ 공정성 + 자체 모델 — 초판의 두 섹션을 하나로 합쳤다 -->
   <section class="block">
     <div class="container">
       <div class="sec-head" data-reveal>
-        <h2>열두 번째 채널은, 저희가 만들었습니다.</h2>
+        <h2>누구에게나 같은 시험지를 씁니다</h2>
         <p>
-          웨더리그 모델은 스스로 날씨를 계산하는 기상 모델이 아닙니다.
-          나머지 채널의 예보를 <b>“그 지역에서 최근에 잘 맞힌 채널의 말을 더 믿는”</b> 방식으로
-          종합합니다. 기상학에서 앙상블이라 부르는 기법이고, 저희는 여기에 <b>지역별 성적</b>을 얹었습니다.
+          모든 채널이 <b>같은 날</b>의 예보를 <b>같은 기상청 관측 기록</b>과 대조하고,
+          <b>같은 규칙</b>으로 평가받습니다. 특정 채널에만 유리한 예외는 두지 않습니다.
         </p>
       </div>
-      <div class="features">
-        <div class="feature" data-reveal>
-          <span class="k gold">원칙 1</span>
-          <h3>가중치는 지역마다 다릅니다</h3>
-          <p>서울에서 잘 맞은 채널과 부산에서 잘 맞은 채널은 다릅니다. 전국 하나의 정답을 쓰지 않습니다.</p>
-        </div>
-        <div class="feature" data-reveal style="--d:.08s">
-          <span class="k green">원칙 2</span>
-          <h3>가중치는 항목마다 다릅니다</h3>
-          <p>기온을 잘 맞히는 채널이 비도 잘 맞히는 것은 아닙니다. 비·구름·기온을 따로 판단합니다.</p>
-        </div>
-        <div class="feature" data-reveal style="--d:.16s">
-          <span class="k blue">원칙 3</span>
-          <h3>자기 성적은 넣지 않습니다</h3>
-          <p>자기 과거 성적으로 자기 가중치를 높이는 순환을 원천 차단했습니다.</p>
-        </div>
-        <div class="feature" data-reveal style="--d:.24s">
-          <span class="k navy">원칙 4</span>
-          <h3>날씨 아이콘은 맨 마지막에 만듭니다</h3>
-          <p>
-            비·구름·기온을 먼저 확정하고 표시용 아이콘을 파생합니다.
-            “비 올 확률은 낮은데 그림은 비” 같은 모순이 구조적으로 생기지 않습니다.
-          </p>
-        </div>
-      </div>
-
       <div class="biz-box biz-box-line" data-reveal>
-        <h3>어디까지 공개하나요</h3>
+        <h3>웨더리그도 직접 시험을 봅니다</h3>
         <p>
-          설계 원칙과 채점 규칙은 공개합니다.
-          <b>가중치를 만드는 산식과 상수, 채널별 가중치 값은 공개하지 않습니다.</b>
-          이 부분이 저희의 핵심 자산이기 때문입니다.
+          저희도 여러 예보를 종합한 자체 앙상블 채널 <b>‘웨더리그 모델’</b>을 운영합니다.
+          최근 그 지역에서 잘 맞은 예보에 더 무게를 주는 방식입니다.
         </p>
         <p>
-          대신 <b>결과는 언제든 검증할 수 있습니다.</b>
-          웨더리그 모델도 다른 채널과 똑같이 채점받고, 성적이 나쁘면 순위표에서 그대로 내려갑니다.
+          <b>그렇다고 특별 대우하지는 않습니다.</b>
+          같은 관측 기록, 같은 규칙으로 채점받고 성적이 낮으면 순위표에서 그대로 내려갑니다.
         </p>
       </div>
     </div>
   </section>
 
-  <!-- ⑥ 중립성 -->
+  <!-- ⑦ 활용 — 6개에서 4개로 -->
   <section class="block">
     <div class="container">
       <div class="sec-head" data-reveal>
-        <h2>우리가 만든 예보를, 우리가 채점해도 될까요?</h2>
-        <p>당연한 의심입니다. 그래서 네 가지를 지킵니다.</p>
-      </div>
-      <ul class="biz-checks" data-reveal>
-        <li><b>같은 규칙</b> — 웨더리그 모델도 다른 채널과 완전히 같은 규칙으로 채점받습니다.</li>
-        <li><b>같은 정답지</b> — 정답은 기상청 관측 기록입니다. 저희가 만들지 않습니다.</li>
-        <li><b>꼴찌도 공개</b> — 자체 모델이 하위권이어도 순위표에 그대로 둡니다.</li>
-        <li><b>기록 보존</b> — 저장한 예보는 수정하지 않고 보존합니다. 나중에 누구든 다시 계산해 볼 수 있습니다.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ⑦ 활용 -->
-  <section class="block">
-    <div class="container">
-      <div class="sec-head" data-reveal>
-        <h2>이런 질문에 답할 수 있습니다.</h2>
+        <h2>이런 질문에 답할 수 있습니다</h2>
       </div>
       <div class="biz-cases" data-reveal>
-        <div class="biz-case"><span class="k gold">에너지</span><p>수요 예측에 쓰는 기온 예보, 우리 권역에서 평균 몇 도 빗나가나요?</p></div>
-        <div class="biz-case"><span class="k green">유통·식음료</span><p>비 예보가 빗나가는 날이 잦은 지역은 어디인가요? 발주를 어느 예보에 맞춰야 하나요?</p></div>
-        <div class="biz-case"><span class="k blue">농업</span><p>우리 산지에서 지난 한 달간 가장 정확했던 예보는 무엇인가요?</p></div>
-        <div class="biz-case"><span class="k navy">건설·물류</span><p>야외 공정을 세우는 판단 기준으로 어떤 예보가 유리한가요?</p></div>
-        <div class="biz-case"><span class="k gold">보험·리스크</span><p>예보와 실제 관측이 어긋난 날을 지역·기간별로 뽑아 주실 수 있나요?</p></div>
-        <div class="biz-case"><span class="k green">언론·리서치</span><p>이번 폭염(호우)에서 어느 예보가 맞혔는지 기록이 있나요?</p></div>
+        <div class="biz-case">
+          <span class="k gold">에너지</span>
+          <p>우리 권역에서 기온 예보는 실제와 평균 얼마나 차이가 났을까요?</p>
+        </div>
+        <div class="biz-case">
+          <span class="k green">유통·농업</span>
+          <p>비 예보가 자주 빗나가는 지역은 어디이고, 어떤 예보에 발주·수확 계획을 맞춰야 할까요?</p>
+        </div>
+        <div class="biz-case">
+          <span class="k blue">건설·물류</span>
+          <p>야외 작업과 운송 일정을 정할 때 우리 지역에서는 어느 예보의 성적이 좋았을까요?</p>
+        </div>
+        <div class="biz-case">
+          <span class="k navy">보험·리서치</span>
+          <p>예보와 실제 관측이 어긋난 사례를 지역별·기간별로 비교할 수 있을까요?</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ⑧ 제공 형태 -->
+  <!-- ⑧ 지금 가능한 범위 — 신뢰 장치, 반드시 유지 -->
   <section class="block">
     <div class="container">
-      <div class="sec-head" data-reveal>
-        <h2>세 가지 형태로 드립니다.</h2>
-      </div>
-      <div class="features">
-        <div class="feature" data-reveal>
-          <span class="k gold">01</span>
-          <h3>지역 정확도 리포트</h3>
-          <p>원하는 지역과 기간의 채널별 성적표, 순위 변화, 어떤 예보를 기준으로 삼는 게 유리한지의 해설. 문서로 드립니다.</p>
-        </div>
-        <div class="feature" data-reveal style="--d:.08s">
-          <span class="k blue">02</span>
-          <h3>데이터 제공</h3>
-          <p>예보 스냅샷·관측 기록·채점 결과 원본을 파일로 드립니다. 자체 분석이나 모델 학습에 쓰실 수 있습니다.</p>
-        </div>
-        <div class="feature" data-reveal style="--d:.16s">
-          <span class="k green">03</span>
-          <h3>맞춤 진단</h3>
-          <p>사업장·지점 목록을 주시면 그 지역들만 따로 모아 집계해 드립니다.</p>
-        </div>
-      </div>
-
       <div class="biz-box biz-box-soft" data-reveal>
         <h3>지금 가능한 범위</h3>
         <p>
           웨더리그는 <b>2026년 7월부터</b> 데이터를 쌓고 있습니다.
-          따라서 <b>계절별 비교처럼 1년치가 필요한 분석은 아직 드릴 수 없습니다.</b>
-          지금 가능한 것은 최근 기간의 지역별 정확도이고,
-          기간이 더 필요한 분석은 <b>언제쯤 가능한지 날짜로 안내</b>드립니다.
+          따라서 <b>1년 이상이 필요한 연간·계절 간 장기 비교는 아직 제공할 단계가 아닙니다.</b>
+          현재는 최근 기간의 지역별 예보 성적과 비교 분석을 중심으로 제공합니다.
+        </p>
+        <p>
+          더 긴 기간이 필요한 분석은 <b>언제쯤 가능한지 시점을 함께 안내</b>드립니다.
+          데이터가 없는 기간을 있는 것처럼 만들지 않습니다.
         </p>
       </div>
     </div>
@@ -287,34 +257,41 @@ const description =
         <details>
           <summary>정답은 무엇을 기준으로 하나요?</summary>
           <p>
-            기상청 관측 기록입니다. 비·기온은 전국 무인 관측소(AWS) 723곳, 구름은 유인 관측소(ASOS) 97곳을 씁니다.
+            기상청 관측 자료입니다. 비·기온은 전국 자동기상관측소 723곳, 구름은 종관기상관측소(ASOS) 97곳을 쓰고,
             시·군·구마다 가장 가까운 지점을 정답지로 고정해 둡니다.
           </p>
         </details>
         <details>
-          <summary>왜 하루 전 예보만 채점하나요?</summary>
+          <summary>왜 같은 시점의 예보끼리만 비교하나요?</summary>
           <p>
-            사흘 전 예보와 하루 전 예보를 한 줄에 세우면 100m 기록과 200m 기록을 섞는 것과 같기 때문입니다.
-            저장은 사흘치까지 하되, 순위는 조건이 같은 예보끼리만 매깁니다.
+            예보는 발표가 늦을수록 실제 날씨에 가까운 정보를 더 많이 갖습니다.
+            정보 시점이 다른 예보를 같은 조건인 것처럼 세우면 100m 기록과 200m 기록을 섞는 것과 같습니다.
           </p>
         </details>
+        {/* ⚠ 이 답은 2026-08-17에 두 번 고쳐졌다. "언제든 다시 계산한다"도, "절대 소급하지
+            않는다"도 사실이 아니다 — v4 계약서 10-1: 기온은 7/14, 구름은 7/31부터 소급
+            재계산하되 **강수는 과거 재료가 없어 소급하지 않는다**. 즉 기준은 "같은 자로 다시
+            잴 수 있는가"이고, 원칙은 "다른 자로 잰 값을 한 집계에 섞지 않는다"이다. */}
         <details>
           <summary>채점 규칙이 바뀌면 과거 점수는 어떻게 되나요?</summary>
           <p>
-            소급해서 다시 채점하지 않습니다. 다른 자로 잰 값은 섞지 않는다는 원칙이고, 규칙이 바뀐 날짜는 기록에 남깁니다.
+            규칙과 적용 시점을 기록하고, <b>서로 다른 기준으로 계산한 점수를 한데 섞지 않습니다.</b>
+            동일한 조건으로 다시 계산할 수 있는 경우에는 버전을 구분해 재계산하고,
+            그렇지 않은 기간은 기존 기록을 그대로 보존합니다.
           </p>
         </details>
         <details>
-          <summary>예보를 직접 만들어 파는 건가요?</summary>
+          <summary>웨더리그가 날씨 예보를 파는 서비스인가요?</summary>
           <p>
-            웨더리그 모델은 저희 자체 채널이지만, 저희가 파는 것의 중심은 예보가 아니라
-            <b>“어느 예보가 얼마나 맞았는가”라는 기록</b>입니다.
+            핵심은 특정 예보를 파는 것이 아니라 <b>여러 예보의 실제 성적을 비교하고 검증하는 것</b>입니다.
+            자체 앙상블 채널도 운영하지만, 그 역시 같은 규칙으로 채점받는 참가자입니다.
           </p>
         </details>
         <details>
           <summary>비용은 얼마인가요?</summary>
           <p>
-            필요하신 지역 수·기간·형식에 따라 다릅니다. 문의 주시면 범위를 함께 정리한 뒤 안내드립니다.
+            지역 수, 기간, 필요한 분석 범위에 따라 달라집니다.
+            먼저 필요한 내용을 확인한 뒤 범위와 비용을 안내드립니다.
           </p>
         </details>
       </div>
@@ -324,9 +301,12 @@ const description =
   <!-- ⑩ CTA -->
   <div class="container cta-wrap">
     <section class="cta-band" data-reveal>
-      <h2>우리 지역 성적표부터 보내드릴게요.</h2>
-      <p>관심 있는 지역 한 곳과 기간을 알려주시면, 샘플 성적표를 만들어 보내드립니다.</p>
-      <a class="btn btn-play-light" href={MAILTO} data-mail={MAIL}>문의하기</a>
+      <h2>우리 지역 성적표부터 확인해 보세요.</h2>
+      <p>
+        관심 있는 지역 한 곳과 기간을 알려주시면,
+        지금 보유한 데이터 범위에서 샘플 성적표를 만들어 보내드립니다.
+      </p>
+      <a class="btn btn-play-light" href={MAILTO} data-mail={MAIL}>우리 지역 샘플 요청하기</a>
       <p class="biz-mail">{MAIL}</p>
     </section>
   </div>
@@ -345,42 +325,15 @@ const description =
     font-size: .82rem; font-weight: 700; letter-spacing: .02em;
   }
 
-  /* 보조 버튼 — 채워진 네이비 버튼 옆에 서는 외곽선 버튼 */
-  .biz-btn-ghost {
-    background: transparent; color: var(--brand);
-    box-shadow: inset 0 0 0 1.5px var(--line);
+  /* 문제 제기의 마무리 질문 — 섹션 안에서 한 번 크게 쉬어 가는 자리 */
+  .biz-lead-q {
+    margin: 0 auto; max-width: 40em; text-align: center;
+    color: var(--sub); line-height: 1.9; font-size: 1.06rem;
   }
-  .biz-btn-ghost:hover { box-shadow: inset 0 0 0 1.5px rgba(18, 57, 118, .35); }
+  .biz-lead-q b { color: var(--ink); }
 
-  /* 질문 목록 — 번호 대신 물음표 마커 */
-  .biz-qlist {
-    list-style: none; margin: 0 auto; padding: 0;
-    max-width: 42em; display: grid; gap: 12px;
-  }
-  .biz-qlist li {
-    position: relative; padding: 18px 22px 18px 56px;
-    background: var(--bg-soft); border-radius: 16px;
-    color: var(--ink); line-height: 1.7;
-  }
-  .biz-qlist li::before {
-    content: "?"; position: absolute; left: 20px; top: 50%;
-    transform: translateY(-50%);
-    width: 24px; height: 24px; border-radius: 50%;
-    background: var(--brand); color: #fff;
-    font-size: .82rem; font-weight: 700;
-    display: grid; place-items: center;
-  }
-  .biz-close {
-    margin: 26px auto 0; max-width: 42em; text-align: center;
-    color: var(--sub); line-height: 1.8;
-  }
-  .biz-note {
-    margin: 32px auto 0; max-width: 44em; text-align: center;
-    color: var(--muted); font-size: .92rem; line-height: 1.7;
-  }
-
-  /* 고지 박스 — 공개 경계(외곽선)와 현재 범위(연한 배경) 두 종류 */
-  .biz-box { margin: 36px auto 0; max-width: 46em; padding: 28px 30px; border-radius: var(--radius); }
+  /* 고지 박스 — 공정성(외곽선)과 현재 범위(연한 배경) 두 종류 */
+  .biz-box { margin: 0 auto; max-width: 46em; padding: 28px 30px; border-radius: var(--radius); }
   .biz-box h3 { margin: 0 0 12px; font-size: 1.05rem; color: var(--ink); }
   .biz-box p { margin: 0 0 10px; color: var(--sub); line-height: 1.8; }
   .biz-box p:last-child { margin-bottom: 0; }
@@ -388,35 +341,18 @@ const description =
   .biz-box-line { box-shadow: inset 0 0 0 1.5px var(--line); background: var(--bg); }
   .biz-box-soft { background: var(--bg-soft); }
 
-  /* 중립성 4항목 */
-  .biz-checks { list-style: none; margin: 0 auto; padding: 0; max-width: 44em; display: grid; gap: 10px; }
-  .biz-checks li {
-    position: relative; padding: 16px 20px 16px 50px;
-    background: var(--bg-soft); border-radius: 14px;
-    color: var(--sub); line-height: 1.7;
-  }
-  .biz-checks li b { color: var(--ink); }
-  .biz-checks li::before {
-    content: ""; position: absolute; left: 20px; top: 22px;
-    width: 14px; height: 8px; border-left: 2.4px solid var(--green);
-    border-bottom: 2.4px solid var(--green); transform: rotate(-45deg);
-  }
-
   /* 활용 사례 카드 */
   .biz-cases { display: grid; gap: 14px; grid-template-columns: 1fr; }
   @media (min-width: 720px) { .biz-cases { grid-template-columns: 1fr 1fr; } }
-  @media (min-width: 1000px) { .biz-cases { grid-template-columns: repeat(3, 1fr); } }
   .biz-case { padding: 22px 24px; background: var(--bg-soft); border-radius: 18px; }
   .biz-case p { margin: 10px 0 0; color: var(--sub); line-height: 1.7; }
 
   /* FAQ — 자바스크립트 없이 details/summary */
   .biz-faq { max-width: 46em; margin: 0 auto; display: grid; gap: 10px; }
-  .biz-faq details {
-    background: var(--bg-soft); border-radius: 16px; padding: 4px 24px;
-  }
+  .biz-faq details { background: var(--bg-soft); border-radius: 16px; padding: 4px 24px; }
   .biz-faq summary {
-    cursor: pointer; list-style: none; padding: 20px 0;
-    font-weight: 700; color: var(--ink); position: relative; padding-right: 30px;
+    cursor: pointer; list-style: none; padding: 20px 30px 20px 0;
+    font-weight: 700; color: var(--ink); position: relative;
   }
   .biz-faq summary::-webkit-details-marker { display: none; }
   .biz-faq summary::after {
