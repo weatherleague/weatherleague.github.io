@@ -6,7 +6,7 @@ const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.weatherleagu
 
 const title = '웨더리그 — 우리 동네에서 경쟁하는 전 세계 일기예보';
 const description =
-  '기상청 예보와 세계 9개 기상 모델, 웨더리그 앙상블, 오픈웨더까지 12개 채널을 매일 실제 관측과 대조해 채점해요. 우리 동네에서 제일 잘 맞는 날씨 채널을 알려드리는 앱, 웨더리그.';
+  '기상청 예보와 세계 9개 기상 모델, 오픈웨더까지 11개 채널을 매일 실제 관측과 대조해 채점해요. 우리 동네에서 제일 잘 맞는 날씨 채널을 알려드리는 앱, 웨더리그.';
 
 const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
@@ -50,7 +50,7 @@ const jsonLd = JSON.stringify({
               <circle cx="12" cy="12" r="8.6" />
               <path d="M3.4 12h17.2M12 3.4c2.9 2.4 2.9 14.8 0 17.2M12 3.4c-2.9 2.4-2.9 14.8 0 17.2" />
             </svg>
-            국내외 12개 예보 비교
+            국내외 11개 예보 비교
           </span>
           <span class="chip">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -72,7 +72,7 @@ const jsonLd = JSON.stringify({
       <div class="mockups" data-reveal style="--d:.15s" aria-label="웨더리그 앱 화면 미리보기">
         <div class="float float-b">
           <div class="phone">
-            <img src={`${base}/shot-league.jpg`} alt="우리 동네 예보 순위 — 12개 채널의 동네별 적중률" loading="eager" />
+            <img src={`${base}/shot-league.jpg`} alt="우리 동네 예보 순위 — 채널별 동네 적중률" loading="eager" />
           </div>
         </div>
         <div class="float float-a">
@@ -88,7 +88,7 @@ const jsonLd = JSON.stringify({
   <section class="block" aria-label="웨더리그 채점 규모">
     <div class="container">
       <div class="stats-band" data-reveal>
-        <div class="stat"><b>12개</b><span>매일 채점하는 국내외 채널</span></div>
+        <div class="stat"><b>11개</b><span>매일 채점하는 국내외 채널</span></div>
         <div class="stat"><b>723곳</b><span>관측소 발표 대조</span></div>
         <div class="stat"><b>3,084건</b><span>하루에 채점하는 예보</span></div>
       </div>
@@ -113,7 +113,7 @@ const jsonLd = JSON.stringify({
           <span class="k gold">리그</span>
           <h3>우리 동네 챔피언은 따로 있어요</h3>
           <p>
-            국내외 12개 예보가 적중률로 매일 순위를 겨뤄요.<br />
+            국내외 11개 예보가 적중률로 매일 순위를 겨뤄요.<br />
             결과는 지역마다 투명하게 공개해요.
           </p>
         </div>
